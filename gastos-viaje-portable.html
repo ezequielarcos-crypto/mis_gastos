@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Gastos de Viaje</title>
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzBmNzY2ZSIvPgogIDxjaXJjbGUgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMTUwIiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2ZiZjEiIHN0cm9rZS13aWR0aD0iMjYiLz4KICA8dGV4dCB4PSIyNTYiIHk9IjMxOCIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOTAiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPiQ8L3RleHQ+CiAgPHBhdGggZD0iTTEyMCA0MDggTDM5MiA0MDgiIHN0cm9rZT0iIzVlZWFkNCIgc3Ryb2tlLXdpZHRoPSIyMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=">
+  <style>
+:root {
+  --primario: #0f766e;
+  --primario-claro: #14b8a6;
+  --primario-suave: #ccfbf1;
+  --fondo: #f4f6f8;
+  --tarjeta: #ffffff;
+  --texto: #1e293b;
+  --texto-suave: #64748b;
+  --borde: #e2e8f0;
+  --rojo: #dc2626;
+  --verde: #16a34a;
+  --radio: 16px;
+  --sombra: 0 1px 3px rgba(15, 23, 42, .08), 0 4px 12px rgba(15, 23, 42, .05);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html { font-size: 16px; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  min-height: 100dvh;
+  padding-bottom: calc(70px + env(safe-area-inset-bottom));
+}
+
+/* ---------- Header ---------- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--primario);
+  color: #fff;
+  padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+  box-shadow: var(--sombra);
+}
+.app-header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: .2px; }
+
+main { padding: 16px; max-width: 560px; margin: 0 auto; }
+
+/* ---------- Tabs ---------- */
+.tab { display: none; }
+.tab.active { display: block; animation: aparecer .18s ease; }
+@keyframes aparecer { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; } }
+
+.tabbar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 10;
+  display: flex;
+  background: var(--tarjeta);
+  border-top: 1px solid var(--borde);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabbar-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 0 8px;
+  border: none;
+  background: none;
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+.tabbar-btn.active { color: var(--primario); }
+.tab-icono { font-size: 1.25rem; }
+
+/* ---------- Tarjetas y listas ---------- */
+.card {
+  background: var(--tarjeta);
+  border-radius: var(--radio);
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--sombra);
+}
+.card h2 { font-size: 1rem; margin-bottom: 12px; }
+
+.totales-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.total-chip {
+  background: var(--primario);
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: .95rem;
+  box-shadow: var(--sombra);
+}
+.total-chip small { display: block; font-weight: 500; font-size: .68rem; opacity: .85; }
+
+.lista { display: flex; flex-direction: column; gap: 10px; }
+
+.gasto-card {
+  background: var(--tarjeta);
+  border-radius: var(--radio);
+  padding: 14px 16px;
+  box-shadow: var(--sombra);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.gasto-info { flex: 1; min-width: 0; }
+.gasto-motivo { font-weight: 700; font-size: .98rem; overflow: hidden; text-overflow: ellipsis; }
+.gasto-meta { font-size: .78rem; color: var(--texto-suave); margin-top: 4px; line-height: 1.5; }
+.gasto-derecha { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.gasto-monto { font-weight: 800; font-size: 1.05rem; color: var(--primario); white-space: nowrap; }
+.etiqueta-pago {
+  font-size: .68rem;
+  font-weight: 600;
+  background: var(--primario-suave);
+  color: var(--primario);
+  border-radius: 99px;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+.btn-borrar-gasto {
+  border: none; background: none;
+  color: var(--texto-suave);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+/* ---------- Personas ---------- */
+.fila-agregar { display: flex; gap: 8px; margin-bottom: 14px; }
+.fila-agregar input { flex: 1; }
+
+.lista-personas { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.lista-personas li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--fondo);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 600;
+}
+.avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--primario-claro);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: .9rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.lista-personas .nombre { flex: 1; }
+.btn-quitar {
+  border: none;
+  background: none;
+  color: var(--rojo);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+/* ---------- Inputs y botones ---------- */
+input[type="text"] {
+  width: 100%;
+  border: 1.5px solid var(--borde);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  background: var(--tarjeta);
+  color: var(--texto);
+  outline: none;
+}
+input[type="text"]:focus { border-color: var(--primario-claro); }
+
+.btn-primario, .btn-secundario, .btn-peligro {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-primario { background: var(--primario); color: #fff; }
+.btn-primario:active { background: #115e59; }
+.btn-secundario { background: var(--fondo); color: var(--texto); border: 1.5px solid var(--borde); }
+.btn-peligro { background: #fee2e2; color: var(--rojo); width: 100%; }
+
+.fab {
+  position: fixed;
+  right: 18px;
+  bottom: calc(74px + env(safe-area-inset-bottom));
+  z-index: 11;
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primario);
+  color: #fff;
+  font-size: 1.9rem;
+  line-height: 1;
+  box-shadow: 0 6px 16px rgba(15, 118, 110, .4);
+  cursor: pointer;
+}
+.fab:active { transform: scale(.94); }
+
+/* ---------- Hoja modal ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, .45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.sheet {
+  background: var(--tarjeta);
+  width: 100%;
+  max-width: 560px;
+  max-height: 92dvh;
+  overflow-y: auto;
+  border-radius: 22px 22px 0 0;
+  padding: 10px 20px calc(24px + env(safe-area-inset-bottom));
+  animation: subir .22s ease;
+}
+@keyframes subir { from { transform: translateY(40%); } to { transform: translateY(0); } }
+.sheet-asa {
+  width: 42px; height: 4px;
+  border-radius: 99px;
+  background: var(--borde);
+  margin: 6px auto 14px;
+}
+.sheet h2 { font-size: 1.1rem; margin-bottom: 16px; }
+
+.campo { display: block; margin-bottom: 16px; }
+.campo > span {
+  display: block;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+  margin-bottom: 7px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.fila-monto { display: flex; flex-direction: column; gap: 10px; }
+#input-monto { font-size: 1.4rem; font-weight: 700; }
+
+.segmentos {
+  display: flex;
+  background: var(--fondo);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+.seg {
+  flex: 1;
+  border: none;
+  background: none;
+  border-radius: 9px;
+  padding: 9px 4px;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.seg.activo { background: var(--tarjeta); color: var(--primario); box-shadow: var(--sombra); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  border: 1.5px solid var(--borde);
+  background: var(--tarjeta);
+  border-radius: 99px;
+  padding: 8px 16px;
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+.chip.activo {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: #fff;
+}
+
+/* ---------- Switch "¿vas a dividir?" ---------- */
+.fila-switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.fila-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.switch {
+  width: 48px; height: 28px;
+  border-radius: 99px;
+  background: var(--borde);
+  position: relative;
+  flex-shrink: 0;
+  transition: background .18s ease;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--sombra);
+  transition: transform .18s ease;
+}
+.fila-switch input:checked + .switch { background: var(--primario); }
+.fila-switch input:checked + .switch::after { transform: translateX(20px); }
+.switch-texto { font-weight: 700; font-size: .92rem; }
+
+.fila-botones { display: flex; gap: 10px; margin-top: 6px; }
+.fila-botones .btn-primario { flex: 2; }
+.fila-botones .btn-secundario { flex: 1; }
+
+/* ---------- Balance ---------- */
+.bloque-moneda { margin-bottom: 18px; }
+.titulo-moneda {
+  font-size: .85rem;
+  font-weight: 800;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 10px;
+}
+.fila-balance {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--borde);
+}
+.fila-balance:last-child { border-bottom: none; }
+.fila-balance .detalle { flex: 1; min-width: 0; }
+.fila-balance .detalle .nombre { font-weight: 700; font-size: .95rem; }
+.fila-balance .detalle .sub { font-size: .75rem; color: var(--texto-suave); }
+.saldo { font-weight: 800; white-space: nowrap; }
+.saldo.positivo { color: var(--verde); }
+.saldo.negativo { color: var(--rojo); }
+.saldo.neutro { color: var(--texto-suave); }
+
+.transferencia {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primario-suave);
+  border-radius: 12px;
+  padding: 11px 14px;
+  margin-bottom: 8px;
+  font-size: .9rem;
+  font-weight: 600;
+  color: #134e4a;
+}
+.transferencia-texto { flex: 1; min-width: 0; }
+.btn-check {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--primario);
+  background: var(--tarjeta);
+  color: var(--primario);
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.btn-check:active { background: var(--primario); color: #fff; }
+.pago-realizado {
+  background: var(--fondo);
+  color: var(--texto-suave);
+}
+.btn-deshacer {
+  border: none;
+  background: none;
+  color: var(--texto-suave);
+  font-size: 1.2rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 2px 6px;
+}
+
+/* ---------- Filtro por persona ---------- */
+.filtro-chips {
+  margin-bottom: 14px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.filtro-chips::-webkit-scrollbar { display: none; }
+.filtro-chips .chip { flex-shrink: 0; }
+
+/* ---------- Varios ---------- */
+.vacio { text-align: center; padding: 60px 24px; color: var(--texto-suave); line-height: 1.6; }
+.vacio-icono { font-size: 3rem; margin-bottom: 12px; }
+.nota { font-size: .8rem; color: var(--texto-suave); margin-bottom: 10px; }
+.zona-peligro .nota { margin-bottom: 12px; }
+.hidden { display: none !important; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(86px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 30;
+  background: #1e293b;
+  color: #fff;
+  border-radius: 99px;
+  padding: 10px 20px;
+  font-size: .85rem;
+  font-weight: 600;
+  box-shadow: var(--sombra);
+  animation: aparecer .2s ease;
+  max-width: 90vw;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+  <header class="app-header">
+    <h1>✈️ Gastos de Viaje</h1>
+  </header>
+
+  <main id="main">
+    <!-- TAB: GASTOS -->
+    <section id="tab-gastos" class="tab active">
+      <div id="filtro-personas" class="chips filtro-chips"></div>
+      <div id="resumen-totales" class="totales-bar"></div>
+      <div id="lista-gastos" class="lista"></div>
+      <div id="gastos-vacio" class="vacio hidden">
+        <div class="vacio-icono">🧾</div>
+        <p>Todavía no hay gastos cargados.<br>Tocá el botón <strong>+</strong> para agregar el primero.</p>
+      </div>
+    </section>
+
+    <!-- TAB: BALANCE -->
+    <section id="tab-balance" class="tab">
+      <div id="contenido-balance"></div>
+      <div id="balance-vacio" class="vacio hidden">
+        <div class="vacio-icono">⚖️</div>
+        <p>Cargá gastos para ver el balance<br>y cómo dividirlos entre el grupo.</p>
+      </div>
+    </section>
+
+    <!-- TAB: PERSONAS -->
+    <section id="tab-personas" class="tab">
+      <div class="card">
+        <h2>Viajeros</h2>
+        <form id="form-persona" class="fila-agregar">
+          <input type="text" id="input-nombre" placeholder="Nombre del viajero" maxlength="25" autocomplete="off">
+          <button type="submit" class="btn-primario">Agregar</button>
+        </form>
+        <ul id="lista-personas" class="lista-personas"></ul>
+        <p id="personas-vacio" class="nota hidden">Agregá a las personas que van a viajar para poder cargar gastos.</p>
+      </div>
+      <div class="card zona-peligro">
+        <h2>Datos del viaje</h2>
+        <p class="nota">Los datos se guardan en este teléfono automáticamente.</p>
+        <button id="btn-reiniciar" class="btn-peligro">🗑️ Borrar todo y empezar un viaje nuevo</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Botón flotante -->
+  <button id="fab" class="fab" aria-label="Agregar gasto">＋</button>
+
+  <!-- Barra de navegación inferior -->
+  <nav class="tabbar">
+    <button class="tabbar-btn active" data-tab="gastos"><span class="tab-icono">🧾</span>Gastos</button>
+    <button class="tabbar-btn" data-tab="balance"><span class="tab-icono">⚖️</span>Balance</button>
+    <button class="tabbar-btn" data-tab="personas"><span class="tab-icono">👥</span>Personas</button>
+  </nav>
+
+  <!-- Hoja modal: nuevo gasto -->
+  <div id="overlay" class="overlay hidden">
+    <div class="sheet" role="dialog" aria-modal="true">
+      <div class="sheet-asa"></div>
+      <h2>Nuevo gasto</h2>
+      <form id="form-gasto">
+        <label class="campo">
+          <span>Monto</span>
+          <div class="fila-monto">
+            <input type="text" id="input-monto" inputmode="decimal" placeholder="0,00" autocomplete="off" required>
+            <div class="segmentos" id="seg-moneda">
+              <button type="button" data-valor="ARS" class="seg activo">$ ARS</button>
+              <button type="button" data-valor="USD" class="seg">US$ USD</button>
+              <button type="button" data-valor="EUR" class="seg">€ EUR</button>
+            </div>
+          </div>
+        </label>
+
+        <label class="campo">
+          <span>Motivo</span>
+          <input type="text" id="input-motivo" placeholder="Ej: cena, nafta, hotel…" maxlength="60" autocomplete="off" required>
+        </label>
+
+        <div class="campo">
+          <span>Forma de pago</span>
+          <div class="segmentos" id="seg-pago">
+            <button type="button" data-valor="efectivo" class="seg activo">💵 Efectivo</button>
+            <button type="button" data-valor="credito" class="seg">💳 Crédito</button>
+            <button type="button" data-valor="debito" class="seg">🏧 Débito</button>
+          </div>
+        </div>
+
+        <div class="campo">
+          <span>¿Quién pagó?</span>
+          <div id="chips-pagador" class="chips"></div>
+        </div>
+
+        <div class="campo">
+          <label class="fila-switch">
+            <input type="checkbox" id="check-dividir" checked>
+            <span class="switch" aria-hidden="true"></span>
+            <span class="switch-texto">¿Vas a dividir el gasto?</span>
+          </label>
+        </div>
+
+        <div class="campo" id="campo-participantes">
+          <span>¿Entre quiénes se divide?</span>
+          <div id="chips-participantes" class="chips"></div>
+        </div>
+
+        <p class="nota" id="fecha-auto"></p>
+
+        <div class="fila-botones">
+          <button type="button" id="btn-cancelar" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primario">Guardar gasto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script>
+"use strict";
+
+/* ================= Estado y persistencia ================= */
+const CLAVE = "gastos-viaje-v1";
+
+let estado = cargar();
+
+function cargar() {
+  try {
+    const crudo = localStorage.getItem(CLAVE);
+    if (crudo) {
+      const datos = JSON.parse(crudo);
+      datos.pagosSaldados ??= [];
+      return datos;
+    }
+  } catch (_) { /* datos corruptos: se reinicia */ }
+  return { personas: [], gastos: [], pagosSaldados: [] };
+}
+
+function guardar() {
+  localStorage.setItem(CLAVE, JSON.stringify(estado));
+}
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+/* ================= Utilidades ================= */
+const LOCALES = { ARS: "es-AR", USD: "en-US", EUR: "de-DE" };
+
+function fmtMonto(valor, moneda) {
+  return new Intl.NumberFormat(LOCALES[moneda] || "es-AR", {
+    style: "currency",
+    currency: moneda,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(valor);
+}
+
+function fmtFecha(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "2-digit" }) +
+    " · " + d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+}
+
+const ETIQUETAS_PAGO = { efectivo: "💵 Efectivo", credito: "💳 Crédito", debito: "🏧 Débito" };
+
+function iniciales(nombre) {
+  return nombre.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join("").toUpperCase();
+}
+
+function nombreDe(id) {
+  const p = estado.personas.find(p => p.id === id);
+  return p ? p.nombre : "?";
+}
+
+function escaparHtml(t) {
+  const div = document.createElement("div");
+  div.textContent = t;
+  return div.innerHTML;
+}
+
+let toastTimer;
+function toast(msj) {
+  const el = document.getElementById("toast");
+  el.textContent = msj;
+  el.classList.remove("hidden");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add("hidden"), 2600);
+}
+
+/* ================= Navegación por pestañas ================= */
+document.querySelectorAll(".tabbar-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tabbar-btn").forEach(b => b.classList.toggle("active", b === btn));
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+    document.getElementById("fab").style.display = btn.dataset.tab === "gastos" ? "" : "none";
+  });
+});
+
+/* ================= Personas ================= */
+document.getElementById("form-persona").addEventListener("submit", e => {
+  e.preventDefault();
+  const input = document.getElementById("input-nombre");
+  const nombre = input.value.trim();
+  if (!nombre) return;
+  if (estado.personas.some(p => p.nombre.toLowerCase() === nombre.toLowerCase())) {
+    toast("Ya hay un viajero con ese nombre");
+    return;
+  }
+  estado.personas.push({ id: uid(), nombre });
+  input.value = "";
+  guardar();
+  render();
+});
+
+function quitarPersona(id) {
+  const involucrada = estado.gastos.some(g => g.pagadorId === id || g.participantes.includes(id)) ||
+    estado.pagosSaldados.some(p => p.de === id || p.a === id);
+  if (involucrada) {
+    toast("No se puede quitar: tiene gastos o pagos asociados");
+    return;
+  }
+  estado.personas = estado.personas.filter(p => p.id !== id);
+  guardar();
+  render();
+}
+
+/* ================= Hoja de nuevo gasto ================= */
+const overlay = document.getElementById("overlay");
+let seleccion = { moneda: "ARS", pago: "efectivo", pagadorId: null, participantes: new Set() };
+
+document.getElementById("fab").addEventListener("click", abrirSheet);
+document.getElementById("btn-cancelar").addEventListener("click", cerrarSheet);
+overlay.addEventListener("click", e => { if (e.target === overlay) cerrarSheet(); });
+
+function abrirSheet() {
+  if (estado.personas.length === 0) {
+    toast("Primero agregá a los viajeros en la pestaña Personas");
+    document.querySelector('[data-tab="personas"]').click();
+    return;
+  }
+  document.getElementById("form-gasto").reset();
+  seleccion.pago = "efectivo";
+  seleccion.pagadorId = estado.personas[0].id;
+  seleccion.participantes = new Set(estado.personas.map(p => p.id));
+  pintarSegmentos("seg-moneda", seleccion.moneda);
+  pintarSegmentos("seg-pago", seleccion.pago);
+  document.getElementById("check-dividir").checked = true;
+  document.getElementById("campo-participantes").classList.remove("hidden");
+  pintarChips();
+  document.getElementById("fecha-auto").textContent =
+    "📅 Fecha y hora de carga: " + fmtFecha(new Date().toISOString()) + " (automática)";
+  overlay.classList.remove("hidden");
+  document.getElementById("input-monto").focus();
+}
+
+function cerrarSheet() {
+  overlay.classList.add("hidden");
+}
+
+function pintarSegmentos(idGrupo, valorActivo) {
+  document.querySelectorAll(`#${idGrupo} .seg`).forEach(b =>
+    b.classList.toggle("activo", b.dataset.valor === valorActivo));
+}
+
+document.getElementById("seg-moneda").addEventListener("click", e => {
+  const b = e.target.closest(".seg");
+  if (!b) return;
+  seleccion.moneda = b.dataset.valor;
+  pintarSegmentos("seg-moneda", seleccion.moneda);
+});
+
+document.getElementById("seg-pago").addEventListener("click", e => {
+  const b = e.target.closest(".seg");
+  if (!b) return;
+  seleccion.pago = b.dataset.valor;
+  pintarSegmentos("seg-pago", seleccion.pago);
+});
+
+document.getElementById("check-dividir").addEventListener("change", e => {
+  document.getElementById("campo-participantes").classList.toggle("hidden", !e.target.checked);
+});
+
+function pintarChips() {
+  const cPagador = document.getElementById("chips-pagador");
+  const cPart = document.getElementById("chips-participantes");
+  cPagador.innerHTML = "";
+  cPart.innerHTML = "";
+  estado.personas.forEach(p => {
+    const b1 = document.createElement("button");
+    b1.type = "button";
+    b1.className = "chip" + (seleccion.pagadorId === p.id ? " activo" : "");
+    b1.textContent = p.nombre;
+    b1.addEventListener("click", () => { seleccion.pagadorId = p.id; pintarChips(); });
+    cPagador.appendChild(b1);
+
+    const b2 = document.createElement("button");
+    b2.type = "button";
+    b2.className = "chip" + (seleccion.participantes.has(p.id) ? " activo" : "");
+    b2.textContent = p.nombre;
+    b2.addEventListener("click", () => {
+      seleccion.participantes.has(p.id) ? seleccion.participantes.delete(p.id) : seleccion.participantes.add(p.id);
+      pintarChips();
+    });
+    cPart.appendChild(b2);
+  });
+}
+
+document.getElementById("form-gasto").addEventListener("submit", e => {
+  e.preventDefault();
+  const textoMonto = document.getElementById("input-monto").value.trim()
+    .replace(/\./g, "").replace(",", ".");
+  const monto = parseFloat(textoMonto);
+  const motivo = document.getElementById("input-motivo").value.trim();
+
+  const divide = document.getElementById("check-dividir").checked;
+
+  if (!monto || monto <= 0) { toast("Ingresá un monto válido"); return; }
+  if (!motivo) { toast("Ingresá el motivo del gasto"); return; }
+  if (!seleccion.pagadorId) { toast("Seleccioná quién pagó"); return; }
+  if (divide && seleccion.participantes.size === 0) { toast("Seleccioná entre quiénes se divide"); return; }
+
+  estado.gastos.unshift({
+    id: uid(),
+    monto,
+    motivo,
+    moneda: seleccion.moneda,
+    pago: seleccion.pago,
+    pagadorId: seleccion.pagadorId,
+    participantes: divide ? [...seleccion.participantes] : [seleccion.pagadorId],
+    fecha: new Date().toISOString(),
+  });
+  guardar();
+  cerrarSheet();
+  render();
+  toast("Gasto guardado ✔");
+});
+
+function borrarGasto(id) {
+  if (!confirm("¿Borrar este gasto?")) return;
+  estado.gastos = estado.gastos.filter(g => g.id !== id);
+  guardar();
+  render();
+}
+
+/* ================= Balance ================= */
+function calcularBalances() {
+  // Agrupado por moneda: { moneda: { total, porPersona: { id: {pago, consumio, transfirio, recibio} }, transferencias } }
+  const porMoneda = {};
+  for (const g of estado.gastos) {
+    const m = porMoneda[g.moneda] ??= { total: 0, porPersona: {} };
+    m.total += g.monto;
+    const cuota = g.monto / g.participantes.length;
+    const reg = id => m.porPersona[id] ??= { pago: 0, consumio: 0, transfirio: 0, recibio: 0 };
+    reg(g.pagadorId).pago += g.monto;
+    g.participantes.forEach(id => { reg(id).consumio += cuota; });
+  }
+  // Los pagos ya saldados corrigen los saldos pendientes
+  for (const p of estado.pagosSaldados) {
+    const m = porMoneda[p.moneda];
+    if (!m) continue;
+    const reg = id => m.porPersona[id] ??= { pago: 0, consumio: 0, transfirio: 0, recibio: 0 };
+    reg(p.de).transfirio += p.monto;
+    reg(p.a).recibio += p.monto;
+  }
+  for (const m of Object.values(porMoneda)) {
+    m.transferencias = liquidar(m.porPersona);
+  }
+  return porMoneda;
+}
+
+function saldoDe(v) {
+  return v.pago - v.consumio + v.transfirio - v.recibio;
+}
+
+// Algoritmo voraz: empareja deudores con acreedores para minimizar transferencias
+function liquidar(porPersona) {
+  const saldos = Object.entries(porPersona)
+    .map(([id, v]) => ({ id, saldo: saldoDe(v) }))
+    .filter(s => Math.abs(s.saldo) > 0.005);
+  const deudores = saldos.filter(s => s.saldo < 0).sort((a, b) => a.saldo - b.saldo);
+  const acreedores = saldos.filter(s => s.saldo > 0).sort((a, b) => b.saldo - a.saldo);
+  const movimientos = [];
+  let i = 0, j = 0;
+  while (i < deudores.length && j < acreedores.length) {
+    const pago = Math.min(-deudores[i].saldo, acreedores[j].saldo);
+    movimientos.push({ de: deudores[i].id, a: acreedores[j].id, monto: pago });
+    deudores[i].saldo += pago;
+    acreedores[j].saldo -= pago;
+    if (deudores[i].saldo > -0.005) i++;
+    if (acreedores[j].saldo < 0.005) j++;
+  }
+  return movimientos;
+}
+
+function saldarDeuda(de, a, monto, moneda) {
+  estado.pagosSaldados.push({ id: uid(), de, a, monto, moneda, fecha: new Date().toISOString() });
+  guardar();
+  render();
+  toast(`Pago de ${nombreDe(de)} a ${nombreDe(a)} registrado ✔`);
+}
+
+function deshacerPago(id) {
+  estado.pagosSaldados = estado.pagosSaldados.filter(p => p.id !== id);
+  guardar();
+  render();
+  toast("Pago deshecho");
+}
+
+/* ================= Render ================= */
+function render() {
+  renderPersonas();
+  renderGastos();
+  renderBalance();
+}
+
+function renderPersonas() {
+  const ul = document.getElementById("lista-personas");
+  ul.innerHTML = "";
+  estado.personas.forEach(p => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="avatar">${escaparHtml(iniciales(p.nombre))}</span>
+      <span class="nombre">${escaparHtml(p.nombre)}</span>`;
+    const btn = document.createElement("button");
+    btn.className = "btn-quitar";
+    btn.textContent = "✕";
+    btn.setAttribute("aria-label", "Quitar a " + p.nombre);
+    btn.addEventListener("click", () => quitarPersona(p.id));
+    li.appendChild(btn);
+    ul.appendChild(li);
+  });
+  document.getElementById("personas-vacio").classList.toggle("hidden", estado.personas.length > 0);
+}
+
+let filtroPersona = null; // null = todos
+
+function renderGastos() {
+  const cont = document.getElementById("lista-gastos");
+  const totales = document.getElementById("resumen-totales");
+  const filtro = document.getElementById("filtro-personas");
+  cont.innerHTML = "";
+  totales.innerHTML = "";
+  filtro.innerHTML = "";
+
+  // Si la persona filtrada fue eliminada, volver a "Todos"
+  if (filtroPersona && !estado.personas.some(p => p.id === filtroPersona)) filtroPersona = null;
+
+  // Chips de filtro por persona (solo si hay viajeros y gastos)
+  if (estado.personas.length > 0 && estado.gastos.length > 0) {
+    const chipTodos = document.createElement("button");
+    chipTodos.className = "chip" + (filtroPersona === null ? " activo" : "");
+    chipTodos.textContent = "Todos";
+    chipTodos.addEventListener("click", () => { filtroPersona = null; renderGastos(); });
+    filtro.appendChild(chipTodos);
+    estado.personas.forEach(p => {
+      const chip = document.createElement("button");
+      chip.className = "chip" + (filtroPersona === p.id ? " activo" : "");
+      chip.textContent = p.nombre;
+      chip.addEventListener("click", () => { filtroPersona = p.id; renderGastos(); });
+      filtro.appendChild(chip);
+    });
+  }
+
+  // Gastos visibles según el filtro (pagó o participa)
+  const visibles = filtroPersona
+    ? estado.gastos.filter(g => g.pagadorId === filtroPersona || g.participantes.includes(filtroPersona))
+    : estado.gastos;
+
+  document.getElementById("gastos-vacio").classList.toggle("hidden", estado.gastos.length > 0);
+
+  // Chips de total por moneda: todo el viaje, o la parte de la persona filtrada
+  const sumas = {};
+  if (filtroPersona) {
+    estado.gastos.forEach(g => {
+      if (!g.participantes.includes(filtroPersona)) return;
+      sumas[g.moneda] = (sumas[g.moneda] || 0) + g.monto / g.participantes.length;
+    });
+  } else {
+    estado.gastos.forEach(g => sumas[g.moneda] = (sumas[g.moneda] || 0) + g.monto);
+  }
+  const etiqueta = filtroPersona ? `Parte de ${nombreDe(filtroPersona)}` : "Total";
+  Object.entries(sumas).forEach(([moneda, total]) => {
+    const chip = document.createElement("div");
+    chip.className = "total-chip";
+    chip.innerHTML = `<small>${escaparHtml(etiqueta)} ${moneda}</small>${fmtMonto(total, moneda)}`;
+    totales.appendChild(chip);
+  });
+
+  visibles.forEach(g => {
+    const card = document.createElement("div");
+    card.className = "gasto-card";
+    const nombresPart = g.participantes.map(nombreDe).join(", ");
+    card.innerHTML = `
+      <div class="gasto-info">
+        <div class="gasto-motivo">${escaparHtml(g.motivo)}</div>
+        <div class="gasto-meta">
+          Pagó <strong>${escaparHtml(nombreDe(g.pagadorId))}</strong> · ${fmtFecha(g.fecha)}<br>
+          Dividido entre: ${escaparHtml(nombresPart)}
+        </div>
+      </div>
+      <div class="gasto-derecha">
+        <span class="gasto-monto">${fmtMonto(g.monto, g.moneda)}</span>
+        <span class="etiqueta-pago">${ETIQUETAS_PAGO[g.pago]}</span>
+      </div>`;
+    const btn = document.createElement("button");
+    btn.className = "btn-borrar-gasto";
+    btn.textContent = "🗑";
+    btn.setAttribute("aria-label", "Borrar gasto");
+    btn.addEventListener("click", () => borrarGasto(g.id));
+    card.querySelector(".gasto-derecha").appendChild(btn);
+    cont.appendChild(card);
+  });
+}
+
+function renderBalance() {
+  const cont = document.getElementById("contenido-balance");
+  cont.innerHTML = "";
+  document.getElementById("balance-vacio").classList.toggle("hidden", estado.gastos.length > 0);
+  if (estado.gastos.length === 0) return;
+
+  const balances = calcularBalances();
+  for (const [moneda, datos] of Object.entries(balances)) {
+    const bloque = document.createElement("div");
+    bloque.className = "bloque-moneda card";
+    let html = `<div class="titulo-moneda">Moneda: ${moneda} — Total ${fmtMonto(datos.total, moneda)}</div>`;
+
+    for (const [id, v] of Object.entries(datos.porPersona)) {
+      const saldo = saldoDe(v);
+      const clase = saldo > 0.005 ? "positivo" : saldo < -0.005 ? "negativo" : "neutro";
+      const signo = saldo > 0.005 ? "+" : "";
+      let sub = `Pagó ${fmtMonto(v.pago, moneda)} · Le corresponde ${fmtMonto(v.consumio, moneda)}`;
+      if (v.transfirio > 0.005) sub += ` · Ya transfirió ${fmtMonto(v.transfirio, moneda)}`;
+      if (v.recibio > 0.005) sub += ` · Ya recibió ${fmtMonto(v.recibio, moneda)}`;
+      html += `
+        <div class="fila-balance">
+          <span class="avatar">${escaparHtml(iniciales(nombreDe(id)))}</span>
+          <div class="detalle">
+            <div class="nombre">${escaparHtml(nombreDe(id))}</div>
+            <div class="sub">${sub}</div>
+          </div>
+          <span class="saldo ${clase}">${signo}${fmtMonto(saldo, moneda)}</span>
+        </div>`;
+    }
+    bloque.innerHTML = html;
+
+    if (datos.transferencias.length > 0) {
+      const titulo = document.createElement("div");
+      titulo.className = "titulo-moneda";
+      titulo.style.marginTop = "14px";
+      titulo.textContent = "Cómo saldar las cuentas";
+      bloque.appendChild(titulo);
+      datos.transferencias.forEach(t => {
+        const fila = document.createElement("div");
+        fila.className = "transferencia";
+        fila.innerHTML = `<span class="transferencia-texto">💸 <strong>${escaparHtml(nombreDe(t.de))}</strong>
+          le paga <strong>${fmtMonto(t.monto, moneda)}</strong>
+          a <strong>${escaparHtml(nombreDe(t.a))}</strong></span>`;
+        const btn = document.createElement("button");
+        btn.className = "btn-check";
+        btn.textContent = "✓";
+        btn.setAttribute("aria-label", "Marcar pago como realizado");
+        btn.addEventListener("click", () => saldarDeuda(t.de, t.a, t.monto, moneda));
+        fila.appendChild(btn);
+        bloque.appendChild(fila);
+      });
+    } else {
+      const ok = document.createElement("div");
+      ok.className = "transferencia";
+      ok.textContent = "✅ Las cuentas están saldadas";
+      bloque.appendChild(ok);
+    }
+
+    // Historial de pagos ya marcados como realizados en esta moneda
+    const realizados = estado.pagosSaldados.filter(p => p.moneda === moneda);
+    if (realizados.length > 0) {
+      const titulo = document.createElement("div");
+      titulo.className = "titulo-moneda";
+      titulo.style.marginTop = "14px";
+      titulo.textContent = "Pagos realizados";
+      bloque.appendChild(titulo);
+      realizados.forEach(p => {
+        const fila = document.createElement("div");
+        fila.className = "transferencia pago-realizado";
+        fila.innerHTML = `<span class="transferencia-texto">✔ <strong>${escaparHtml(nombreDe(p.de))}</strong>
+          le pagó <strong>${fmtMonto(p.monto, moneda)}</strong>
+          a <strong>${escaparHtml(nombreDe(p.a))}</strong> · ${fmtFecha(p.fecha)}</span>`;
+        const btn = document.createElement("button");
+        btn.className = "btn-deshacer";
+        btn.textContent = "↩";
+        btn.setAttribute("aria-label", "Deshacer este pago");
+        btn.addEventListener("click", () => deshacerPago(p.id));
+        fila.appendChild(btn);
+        bloque.appendChild(fila);
+      });
+    }
+
+    cont.appendChild(bloque);
+  }
+}
+
+/* ================= Reiniciar viaje ================= */
+document.getElementById("btn-reiniciar").addEventListener("click", () => {
+  if (!confirm("¿Borrar TODOS los viajeros y gastos? Esta acción no se puede deshacer.")) return;
+  estado = { personas: [], gastos: [], pagosSaldados: [] };
+  guardar();
+  render();
+  toast("Viaje reiniciado");
+});
+
+
+render();
+</script>
+</body>
+</html>
