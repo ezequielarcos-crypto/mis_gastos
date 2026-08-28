@@ -1,9 +1,10 @@
-const CACHE = "gastos-viaje-v2";
+const CACHE = "gastos-viaje-v3";
 const ARCHIVOS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./cotizaciones.js",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",

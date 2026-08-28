@@ -478,6 +478,161 @@ function renderBalance() {
   }
 }
 
+/* ================= Conversor de moneda ================= */
+const NOMBRES_MONEDA_BASE = { ARS: "Peso argentino", USD: "Dólar estadounidense", EUR: "Euro" };
+
+let conversorEstado = {
+  de: "ARS",
+  a: "USD",
+  tipoDolar: "blue",
+  monedasExtra: [], // [{ codigo, nombre }] agregadas por el usuario en esta sesión
+};
+
+const selConvDe = document.getElementById("conv-de");
+const selConvA = document.getElementById("conv-a");
+const selNuevaMoneda = document.getElementById("conv-nueva-moneda");
+
+// Formato seguro: algunas monedas de DolarAPI (ej. cripto) no son códigos ISO
+// válidos para Intl.NumberFormat, así que si falla se usa un formato genérico.
+function fmtMontoSeguro(valor, moneda) {
+  try {
+    return fmtMonto(valor, moneda);
+  } catch (_) {
+    return new Intl.NumberFormat("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor) + " " + moneda;
+  }
+}
+
+function pintarSelectsConversor() {
+  const opciones = [
+    ...MONEDAS_BASE.map(codigo => ({ codigo, nombre: NOMBRES_MONEDA_BASE[codigo] })),
+    ...conversorEstado.monedasExtra,
+  ];
+  [selConvDe, selConvA].forEach(sel => {
+    sel.innerHTML = "";
+    opciones.forEach(({ codigo, nombre }) => {
+      const opt = document.createElement("option");
+      opt.value = codigo;
+      opt.textContent = `${codigo} — ${nombre}`;
+      sel.appendChild(opt);
+    });
+  });
+  selConvDe.value = conversorEstado.de;
+  selConvA.value = conversorEstado.a;
+}
+
+function actualizarVisibilidadTipoDolar() {
+  const involucraDolar = conversorEstado.de === "USD" || conversorEstado.a === "USD";
+  document.getElementById("campo-tipo-dolar").classList.toggle("hidden", !involucraDolar);
+}
+
+let tokenConversion = 0;
+async function actualizarConversion() {
+  const elResultado = document.getElementById("conv-resultado-valor");
+  const elEstado = document.getElementById("conv-estado");
+  const textoMonto = document.getElementById("conv-monto").value.trim()
+    .replace(/\./g, "").replace(",", ".");
+  const monto = parseFloat(textoMonto);
+
+  if (!monto || monto <= 0) {
+    elResultado.textContent = "—";
+    elEstado.textContent = "";
+    elEstado.className = "nota";
+    return;
+  }
+
+  const miToken = ++tokenConversion;
+  const { valor, desactualizado, error, actualizadoEn } =
+    await convertCurrency(monto, conversorEstado.de, conversorEstado.a, conversorEstado.tipoDolar);
+  if (miToken !== tokenConversion) return; // llegó una respuesta vieja: se descarta
+
+  if (valor == null) {
+    elResultado.textContent = "—";
+    elEstado.textContent = "⚠️ " + (error || "No se pudo obtener la cotización");
+    elEstado.className = "nota nota-error";
+    return;
+  }
+
+  elResultado.textContent = fmtMontoSeguro(valor, conversorEstado.a);
+  const fecha = actualizadoEn ? "Cotización del " + fmtFecha(new Date(actualizadoEn).toISOString()) : "";
+  if (desactualizado) {
+    elEstado.textContent = "⚠️ " + (fecha || "Sin conexión") + " (desactualizada)";
+    elEstado.className = "nota nota-desactualizado";
+  } else {
+    elEstado.textContent = fecha;
+    elEstado.className = "nota";
+  }
+}
+
+selConvDe.addEventListener("change", () => {
+  conversorEstado.de = selConvDe.value;
+  actualizarVisibilidadTipoDolar();
+  actualizarConversion();
+});
+selConvA.addEventListener("change", () => {
+  conversorEstado.a = selConvA.value;
+  actualizarVisibilidadTipoDolar();
+  actualizarConversion();
+});
+
+document.getElementById("conv-invertir").addEventListener("click", () => {
+  [conversorEstado.de, conversorEstado.a] = [conversorEstado.a, conversorEstado.de];
+  pintarSelectsConversor();
+  actualizarVisibilidadTipoDolar();
+  actualizarConversion();
+});
+
+document.getElementById("conv-monto").addEventListener("input", actualizarConversion);
+
+document.getElementById("seg-tipo-dolar").addEventListener("click", e => {
+  const b = e.target.closest(".seg");
+  if (!b) return;
+  conversorEstado.tipoDolar = b.dataset.valor;
+  pintarSegmentos("seg-tipo-dolar", conversorEstado.tipoDolar);
+  actualizarConversion();
+});
+
+document.getElementById("btn-agregar-moneda").addEventListener("click", async () => {
+  const datos = await obtenerCotizaciones();
+  const yaAgregadas = new Set([...MONEDAS_BASE, ...conversorEstado.monedasExtra.map(m => m.codigo)]);
+  const disponibles = monedasDisponibles(datos).filter(m => !yaAgregadas.has(m.codigo));
+  if (disponibles.length === 0) {
+    toast("No hay más monedas disponibles para agregar");
+    return;
+  }
+  selNuevaMoneda.innerHTML = "";
+  disponibles.forEach(({ codigo, nombre }) => {
+    const opt = document.createElement("option");
+    opt.value = codigo;
+    opt.textContent = `${codigo} — ${nombre}`;
+    selNuevaMoneda.appendChild(opt);
+  });
+  selNuevaMoneda.classList.remove("hidden");
+  selNuevaMoneda.focus();
+});
+
+selNuevaMoneda.addEventListener("change", () => {
+  const codigo = selNuevaMoneda.value;
+  if (!codigo) return;
+  const nombre = selNuevaMoneda.selectedOptions[0]?.textContent.split(" — ")[1] || codigo;
+  conversorEstado.monedasExtra.push({ codigo, nombre });
+  conversorEstado.a = codigo;
+  selNuevaMoneda.classList.add("hidden");
+  selNuevaMoneda.innerHTML = "";
+  pintarSelectsConversor();
+  actualizarVisibilidadTipoDolar();
+  actualizarConversion();
+  toast(`${codigo} agregado al conversor`);
+});
+
+document.getElementById("btn-refrescar-cotizacion").addEventListener("click", async () => {
+  await obtenerCotizaciones({ forzar: true });
+  actualizarConversion();
+});
+
+pintarSelectsConversor();
+actualizarVisibilidadTipoDolar();
+actualizarConversion();
+
 /* ================= Reiniciar viaje ================= */
 document.getElementById("btn-reiniciar").addEventListener("click", () => {
   if (!confirm("¿Borrar TODOS los viajeros y gastos? Esta acción no se puede deshacer.")) return;

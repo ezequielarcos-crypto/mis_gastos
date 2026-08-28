@@ -166,7 +166,7 @@ main { padding: 16px; max-width: 560px; margin: 0 auto; }
 }
 
 /* ---------- Inputs y botones ---------- */
-input[type="text"] {
+input[type="text"], select {
   width: 100%;
   border: 1.5px solid var(--borde);
   border-radius: 12px;
@@ -176,7 +176,7 @@ input[type="text"] {
   color: var(--texto);
   outline: none;
 }
-input[type="text"]:focus { border-color: var(--primario-claro); }
+input[type="text"]:focus, select:focus { border-color: var(--primario-claro); }
 
 .btn-primario, .btn-secundario, .btn-peligro {
   border: none;
@@ -387,6 +387,55 @@ input[type="text"]:focus { border-color: var(--primario-claro); }
   flex-shrink: 0;
   padding: 2px 6px;
 }
+
+/* ---------- Conversor de moneda ---------- */
+.fila-titulo-conversor { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.fila-titulo-conversor h2 { margin-bottom: 0; }
+.btn-refrescar {
+  border: none;
+  background: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  color: var(--texto-suave);
+}
+.btn-refrescar:active { color: var(--primario); }
+
+.fila-conversor {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.campo-moneda { flex: 1; margin-bottom: 0; }
+.btn-invertir {
+  border: 1.5px solid var(--borde);
+  background: var(--tarjeta);
+  border-radius: 12px;
+  width: 44px; height: 44px;
+  font-size: 1.1rem;
+  color: var(--primario);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.btn-invertir:active { background: var(--primario-suave); }
+
+.campo-agregar-moneda { display: flex; flex-direction: column; gap: 8px; }
+
+.resultado-conversor {
+  background: var(--primario-suave);
+  color: #134e4a;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.nota-error { color: var(--rojo); }
+.nota-desactualizado { color: #b45309; }
 
 /* ---------- Filtro por persona ---------- */
 .filtro-chips {

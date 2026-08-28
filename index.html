@@ -54,6 +54,51 @@
         <button id="btn-reiniciar" class="btn-peligro">🗑️ Borrar todo y empezar un viaje nuevo</button>
       </div>
     </section>
+
+    <!-- TAB: CAMBIO -->
+    <section id="tab-cambio" class="tab">
+      <div class="card">
+        <div class="fila-titulo-conversor">
+          <h2>💱 Conversor de moneda</h2>
+          <button type="button" id="btn-refrescar-cotizacion" class="btn-refrescar" aria-label="Actualizar cotización">🔄</button>
+        </div>
+
+        <label class="campo">
+          <span>Monto</span>
+          <input type="text" id="conv-monto" inputmode="decimal" placeholder="0,00" autocomplete="off" value="1">
+        </label>
+
+        <div class="fila-conversor">
+          <label class="campo campo-moneda">
+            <span>De</span>
+            <select id="conv-de"></select>
+          </label>
+          <button type="button" id="conv-invertir" class="btn-invertir" aria-label="Invertir monedas">⇄</button>
+          <label class="campo campo-moneda">
+            <span>A</span>
+            <select id="conv-a"></select>
+          </label>
+        </div>
+
+        <div class="campo" id="campo-tipo-dolar">
+          <span>Cotización del dólar</span>
+          <div class="segmentos" id="seg-tipo-dolar">
+            <button type="button" data-valor="blue" class="seg activo">Blue</button>
+            <button type="button" data-valor="oficial" class="seg">Oficial</button>
+          </div>
+        </div>
+
+        <div class="campo campo-agregar-moneda">
+          <button type="button" id="btn-agregar-moneda" class="btn-secundario">+ Agregar otra moneda</button>
+          <select id="conv-nueva-moneda" class="hidden"></select>
+        </div>
+
+        <div id="conv-resultado" class="resultado-conversor">
+          <span id="conv-resultado-valor">—</span>
+        </div>
+        <p id="conv-estado" class="nota"></p>
+      </div>
+    </section>
   </main>
 
   <!-- Botón flotante -->
@@ -64,6 +109,7 @@
     <button class="tabbar-btn active" data-tab="gastos"><span class="tab-icono">🧾</span>Gastos</button>
     <button class="tabbar-btn" data-tab="balance"><span class="tab-icono">⚖️</span>Balance</button>
     <button class="tabbar-btn" data-tab="personas"><span class="tab-icono">👥</span>Personas</button>
+    <button class="tabbar-btn" data-tab="cambio"><span class="tab-icono">💱</span>Cambio</button>
   </nav>
 
   <!-- Hoja modal: nuevo gasto -->
@@ -128,6 +174,7 @@
 
   <div id="toast" class="toast hidden"></div>
 
+  <script src="cotizaciones.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
