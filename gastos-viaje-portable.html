@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0f766e">
   <meta name="mobile-web-app-capable" content="yes">
-  <title>Gastos de Viaje</title>
-  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0iIzBmNzY2ZSIvPgogIDxjaXJjbGUgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMTUwIiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2ZiZjEiIHN0cm9rZS13aWR0aD0iMjYiLz4KICA8dGV4dCB4PSIyNTYiIHk9IjMxOCIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOTAiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPiQ8L3RleHQ+CiAgPHBhdGggZD0iTTEyMCA0MDggTDM5MiA0MDgiIHN0cm9rZT0iIzVlZWFkNCIgc3Ryb2tlLXdpZHRoPSIyMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=">
+  <title>Gastos de Viaje — versión portable</title>
   <style>
 :root {
   --primario: #0f766e;
@@ -70,9 +69,10 @@ main { padding: 16px; max-width: 560px; margin: 0 auto; }
   align-items: center;
   gap: 2px;
   padding: 10px 0 8px;
+  min-width: 0;
   border: none;
   background: none;
-  font-size: .72rem;
+  font-size: .68rem;
   font-weight: 600;
   color: var(--texto-suave);
   cursor: pointer;
@@ -176,7 +176,7 @@ main { padding: 16px; max-width: 560px; margin: 0 auto; }
 }
 
 /* ---------- Inputs y botones ---------- */
-input[type="text"] {
+input[type="text"], select {
   width: 100%;
   border: 1.5px solid var(--borde);
   border-radius: 12px;
@@ -186,7 +186,7 @@ input[type="text"] {
   color: var(--texto);
   outline: none;
 }
-input[type="text"]:focus { border-color: var(--primario-claro); }
+input[type="text"]:focus, select:focus { border-color: var(--primario-claro); }
 
 .btn-primario, .btn-secundario, .btn-peligro {
   border: none;
@@ -398,6 +398,129 @@ input[type="text"]:focus { border-color: var(--primario-claro); }
   padding: 2px 6px;
 }
 
+/* ---------- Conversor de moneda ---------- */
+.fila-titulo-conversor { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.fila-titulo-conversor h2 { margin-bottom: 0; }
+.btn-refrescar {
+  border: none;
+  background: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  color: var(--texto-suave);
+}
+.btn-refrescar:active { color: var(--primario); }
+
+.fila-conversor {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.campo-moneda { flex: 1; margin-bottom: 0; }
+.btn-invertir {
+  border: 1.5px solid var(--borde);
+  background: var(--tarjeta);
+  border-radius: 12px;
+  width: 44px; height: 44px;
+  font-size: 1.1rem;
+  color: var(--primario);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.btn-invertir:active { background: var(--primario-suave); }
+
+.campo-agregar-moneda { display: flex; flex-direction: column; gap: 8px; }
+
+.resultado-conversor {
+  background: var(--primario-suave);
+  color: #134e4a;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.nota-error { color: var(--rojo); }
+.nota-desactualizado { color: #b45309; }
+
+/* ---------- Vuelos ---------- */
+.btn-ancho { width: 100%; }
+
+.vuelo-card {
+  background: var(--tarjeta);
+  border-radius: var(--radio);
+  padding: 16px;
+  box-shadow: var(--sombra);
+}
+.vuelo-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.vuelo-numero { font-weight: 800; font-size: 1.05rem; color: var(--primario); }
+.vuelo-aerolinea { font-size: .78rem; color: var(--texto-suave); margin-top: 2px; }
+.vuelo-estado {
+  font-size: .7rem;
+  font-weight: 700;
+  border-radius: 99px;
+  padding: 5px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.estado-programado { background: var(--primario-suave); color: #134e4a; }
+.estado-activo { background: #dbeafe; color: #1d4ed8; }
+.estado-aterrizado { background: #dcfce7; color: #166534; }
+.estado-cancelado { background: #fee2e2; color: var(--rojo); }
+.estado-desviado { background: #fef3c7; color: #b45309; }
+.estado-neutro { background: var(--fondo); color: var(--texto-suave); }
+
+.vuelo-ruta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vuelo-punta { flex: 1; min-width: 0; }
+.vuelo-punta-fin { text-align: right; }
+.vuelo-iata { font-size: 1.3rem; font-weight: 800; letter-spacing: .5px; }
+.vuelo-hora { font-size: 1rem; font-weight: 700; color: var(--texto); }
+.vuelo-detalle {
+  font-size: .72rem;
+  color: var(--texto-suave);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vuelo-flecha {
+  color: var(--primario-claro);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  border-top: 2px dashed var(--borde);
+  padding: 0 6px;
+  align-self: flex-start;
+  margin-top: 14px;
+}
+.vuelo-demora {
+  margin-top: 12px;
+  background: #fef3c7;
+  color: #b45309;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: .8rem;
+  font-weight: 700;
+}
+.btn-vuelo-accion {
+  width: 100%;
+  margin-top: 12px;
+  font-size: .85rem;
+  padding: 10px;
+}
+
 /* ---------- Filtro por persona ---------- */
 .filtro-chips {
   margin-bottom: 14px;
@@ -433,6 +556,7 @@ input[type="text"]:focus { border-color: var(--primario-claro); }
   max-width: 90vw;
   text-align: center;
 }
+
 </style>
 </head>
 <body>
@@ -478,6 +602,131 @@ input[type="text"]:focus { border-color: var(--primario-claro); }
         <button id="btn-reiniciar" class="btn-peligro">🗑️ Borrar todo y empezar un viaje nuevo</button>
       </div>
     </section>
+
+    <!-- TAB: CAMBIO -->
+    <section id="tab-cambio" class="tab">
+      <div class="card">
+        <div class="fila-titulo-conversor">
+          <h2>💱 Conversor de moneda</h2>
+          <button type="button" id="btn-refrescar-cotizacion" class="btn-refrescar" aria-label="Actualizar cotización">🔄</button>
+        </div>
+
+        <label class="campo">
+          <span>Monto</span>
+          <input type="text" id="conv-monto" inputmode="decimal" placeholder="0,00" autocomplete="off" value="1">
+        </label>
+
+        <div class="fila-conversor">
+          <label class="campo campo-moneda">
+            <span>De</span>
+            <select id="conv-de"></select>
+          </label>
+          <button type="button" id="conv-invertir" class="btn-invertir" aria-label="Invertir monedas">⇄</button>
+          <label class="campo campo-moneda">
+            <span>A</span>
+            <select id="conv-a"></select>
+          </label>
+        </div>
+
+        <div class="campo" id="campo-tipo-dolar">
+          <span>Cotización del dólar</span>
+          <div class="segmentos" id="seg-tipo-dolar">
+            <button type="button" data-valor="blue" class="seg activo">Blue</button>
+            <button type="button" data-valor="oficial" class="seg">Oficial</button>
+          </div>
+        </div>
+
+        <div class="campo campo-agregar-moneda">
+          <button type="button" id="btn-agregar-moneda" class="btn-secundario">+ Agregar otra moneda</button>
+          <select id="conv-nueva-moneda" class="hidden"></select>
+        </div>
+
+        <div id="conv-resultado" class="resultado-conversor">
+          <span id="conv-resultado-valor">—</span>
+        </div>
+        <p id="conv-estado" class="nota"></p>
+      </div>
+    </section>
+
+    <!-- TAB: VUELOS -->
+    <section id="tab-vuelos" class="tab">
+      <div class="card">
+        <div class="fila-titulo-conversor">
+          <h2>🛫 Estado de vuelos</h2>
+          <button type="button" id="btn-config-vuelos" class="btn-refrescar" aria-label="Configurar clave de API">⚙️</button>
+        </div>
+
+        <div class="campo">
+          <span>Buscar por</span>
+          <div class="segmentos" id="seg-modo-vuelo">
+            <button type="button" data-valor="numero" class="seg activo">N.º de vuelo</button>
+            <button type="button" data-valor="ruta" class="seg">Ruta</button>
+          </div>
+        </div>
+
+        <form id="form-vuelo" autocomplete="off">
+          <div id="campo-vuelo-numero">
+            <label class="campo">
+              <span>Número de vuelo (IATA)</span>
+              <input type="text" id="vuelo-numero" placeholder="Ej: AR1301" maxlength="10">
+            </label>
+          </div>
+
+          <div id="campo-vuelo-ruta" class="hidden">
+            <div class="fila-conversor">
+              <label class="campo campo-moneda">
+                <span>Origen</span>
+                <input type="text" id="vuelo-origen" placeholder="EZE" maxlength="3">
+              </label>
+              <button type="button" id="vuelo-invertir" class="btn-invertir" aria-label="Invertir origen y destino">⇄</button>
+              <label class="campo campo-moneda">
+                <span>Destino</span>
+                <input type="text" id="vuelo-destino" placeholder="MAD" maxlength="3">
+              </label>
+            </div>
+            <p class="nota">Códigos IATA de 3 letras (EZE, AEP, MAD, GRU…).</p>
+          </div>
+
+          <button type="submit" class="btn-primario btn-ancho">🔍 Buscar vuelos</button>
+        </form>
+        <p id="vuelos-estado" class="nota"></p>
+      </div>
+
+      <!-- Configuración de la API -->
+      <div id="config-vuelos" class="card hidden">
+        <h2>🔑 Clave de AviationStack</h2>
+        <p class="nota">
+          Sacá tu clave gratuita en <strong>aviationstack.com</strong> (100 consultas por mes).
+          Se guarda solo en este dispositivo.
+        </p>
+        <label class="campo">
+          <span>Access key</span>
+          <input type="text" id="input-api-key" placeholder="Pegá acá tu clave" autocomplete="off">
+        </label>
+        <label class="campo">
+          <span>Proxy HTTPS (opcional)</span>
+          <input type="text" id="input-api-proxy" placeholder="https://mi-proxy.com/?url=" autocomplete="off">
+        </label>
+        <p class="nota">
+          El plan gratuito solo responde por HTTP, y esta app se sirve por HTTPS: si ves un error de
+          conexión, cargá acá un proxy HTTPS o abrí la app localmente.
+        </p>
+        <div class="fila-botones">
+          <button type="button" id="btn-borrar-key" class="btn-secundario">Borrar</button>
+          <button type="button" id="btn-guardar-key" class="btn-primario">Guardar</button>
+        </div>
+        <p id="uso-api" class="nota"></p>
+      </div>
+
+      <div id="lista-vuelos" class="lista"></div>
+
+      <div id="vuelos-guardados"></div>
+
+      <div id="vuelos-vacio" class="vacio">
+        <div class="vacio-icono">🛫</div>
+        <p>Buscá un vuelo por número o por ruta<br>para ver horarios, puertas y demoras.</p>
+      </div>
+    </section>
   </main>
 
   <!-- Botón flotante -->
@@ -488,6 +737,8 @@ input[type="text"]:focus { border-color: var(--primario-claro); }
     <button class="tabbar-btn active" data-tab="gastos"><span class="tab-icono">🧾</span>Gastos</button>
     <button class="tabbar-btn" data-tab="balance"><span class="tab-icono">⚖️</span>Balance</button>
     <button class="tabbar-btn" data-tab="personas"><span class="tab-icono">👥</span>Personas</button>
+    <button class="tabbar-btn" data-tab="cambio"><span class="tab-icono">💱</span>Cambio</button>
+    <button class="tabbar-btn" data-tab="vuelos"><span class="tab-icono">🛫</span>Vuelos</button>
   </nav>
 
   <!-- Hoja modal: nuevo gasto -->
@@ -555,6 +806,398 @@ input[type="text"]:focus { border-color: var(--primario-claro); }
   <script>
 "use strict";
 
+/* =========================================================================
+   Servicio de cotizaciones (DolarAPI - Argentina, sin API key)
+   Expone: obtenerCotizaciones(), convertCurrency(), monedasDisponibles()
+   ========================================================================= */
+
+const CLAVE_COTIZACIONES = "gastos-viaje-cotizaciones-v1";
+const TTL_COTIZACIONES_MS = 15 * 60 * 1000; // refrescar cada 15 minutos
+
+const URL_DOLARES = "https://dolarapi.com/v1/dolares";
+const URL_COTIZACIONES = "https://dolarapi.com/v1/cotizaciones";
+
+const MONEDAS_BASE = ["ARS", "USD", "EUR"];
+
+/* ---------------- Cache en localStorage ---------------- */
+function cargarCacheCotizaciones() {
+  try {
+    const crudo = localStorage.getItem(CLAVE_COTIZACIONES);
+    return crudo ? JSON.parse(crudo) : null;
+  } catch (_) {
+    return null; // cache corrupto: se ignora y se vuelve a pedir
+  }
+}
+
+function guardarCacheCotizaciones(dolares, cotizaciones) {
+  const datos = { dolares, cotizaciones, actualizadoEn: Date.now() };
+  try {
+    localStorage.setItem(CLAVE_COTIZACIONES, JSON.stringify(datos));
+  } catch (_) { /* almacenamiento lleno o no disponible: se sigue igual */ }
+  return datos;
+}
+
+let promesaEnCurso = null; // evita disparar pedidos duplicados en paralelo
+
+/**
+ * Devuelve { dolares, cotizaciones, actualizadoEn, desactualizado, error }.
+ * Si el cache (localStorage) tiene menos de TTL_COTIZACIONES_MS, lo reutiliza
+ * sin pegarle a la red. Si falla el fetch, cae al último cache disponible
+ * marcado como "desactualizado"; si no hay ningún cache, devuelve error.
+ */
+async function obtenerCotizaciones({ forzar = false } = {}) {
+  const cache = cargarCacheCotizaciones();
+  const vigente = cache && (Date.now() - cache.actualizadoEn < TTL_COTIZACIONES_MS);
+
+  if (vigente && !forzar) {
+    return { ...cache, desactualizado: false, error: null };
+  }
+
+  if (promesaEnCurso) return promesaEnCurso;
+
+  promesaEnCurso = (async () => {
+    try {
+      const [resDolares, resCotizaciones] = await Promise.all([
+        fetch(URL_DOLARES),
+        fetch(URL_COTIZACIONES),
+      ]);
+      if (!resDolares.ok || !resCotizaciones.ok) throw new Error("DolarAPI no respondió correctamente");
+      const [dolares, cotizaciones] = await Promise.all([resDolares.json(), resCotizaciones.json()]);
+      const datos = guardarCacheCotizaciones(dolares, cotizaciones);
+      return { ...datos, desactualizado: false, error: null };
+    } catch (err) {
+      if (cache) return { ...cache, desactualizado: true, error: err.message };
+      return { dolares: [], cotizaciones: [], actualizadoEn: null, desactualizado: true, error: err.message };
+    } finally {
+      promesaEnCurso = null;
+    }
+  })();
+
+  return promesaEnCurso;
+}
+
+/* ---------------- Tasas y conversión ---------------- */
+function tasaDeDolar(dolares, tipo) {
+  const d = dolares.find(x => x.casa === tipo);
+  return d ? (d.compra + d.venta) / 2 : null;
+}
+
+function tasaDeCotizacion(cotizaciones, moneda) {
+  const c = cotizaciones.find(x => x.moneda === moneda);
+  return c ? (c.compra + c.venta) / 2 : null;
+}
+
+// Cuántos ARS vale 1 unidad de `moneda` (promedio compra/venta de DolarAPI).
+// `tipo` solo aplica cuando moneda === "USD" (oficial | blue | bolsa | ...).
+function tasaEnArs(datos, moneda, tipo) {
+  if (moneda === "ARS") return 1;
+  if (moneda === "USD") return tasaDeDolar(datos.dolares, tipo);
+  return tasaDeCotizacion(datos.cotizaciones, moneda);
+}
+
+/**
+ * Convierte `amount` de la moneda `from` a la moneda `to`.
+ * tipo: "oficial" | "blue" (u otra casa de DolarAPI) — por defecto "blue",
+ * ya que es el tipo de cambio de referencia real. Solo afecta si from/to es USD.
+ * Devuelve una Promise<{ valor, desactualizado, error, actualizadoEn }>.
+ * `valor` es null si no hay cotización disponible para alguna de las monedas.
+ */
+async function convertCurrency(amount, from, to, tipo = "blue") {
+  const datos = await obtenerCotizaciones();
+
+  if (from === to) {
+    return { valor: amount, desactualizado: datos.desactualizado, error: datos.error, actualizadoEn: datos.actualizadoEn };
+  }
+
+  const tasaFrom = tasaEnArs(datos, from, tipo);
+  const tasaTo = tasaEnArs(datos, to, tipo);
+  if (tasaFrom == null || tasaTo == null) {
+    return {
+      valor: null,
+      desactualizado: datos.desactualizado,
+      error: `No hay cotización disponible para ${tasaFrom == null ? from : to}`,
+      actualizadoEn: datos.actualizadoEn,
+    };
+  }
+
+  const enArs = amount * tasaFrom;
+  const valor = to === "ARS" ? enArs : enArs / tasaTo;
+  return { valor, desactualizado: datos.desactualizado, error: datos.error, actualizadoEn: datos.actualizadoEn };
+}
+
+/**
+ * Monedas que se pueden agregar al conversor además de ARS/USD/EUR,
+ * a partir de lo que devuelve /v1/cotizaciones (euro, real, etc.).
+ * Devuelve [{ codigo, nombre }] sin duplicados.
+ */
+function monedasDisponibles(datos) {
+  const vistas = new Set();
+  const lista = [];
+  for (const c of datos.cotizaciones || []) {
+    if (MONEDAS_BASE.includes(c.moneda) || vistas.has(c.moneda)) continue;
+    vistas.add(c.moneda);
+    lista.push({ codigo: c.moneda, nombre: c.nombre });
+  }
+  return lista;
+}
+
+
+"use strict";
+
+/* =========================================================================
+   Servicio de vuelos (AviationStack — https://aviationstack.com)
+   Expone: buscarVuelos(), obtenerClaveApi(), guardarClaveApi(),
+           borrarClaveApi(), usoMensual(), estadoVuelo()
+
+   ┌───────────────────────────────────────────────────────────────────────┐
+   │  🔑 DÓNDE VA TU CLAVE DE API                                          │
+   │                                                                       │
+   │  Opción A (RECOMENDADA): desde la app.                                │
+   │     Pestaña "Vuelos" → botón ⚙️ → pegás la clave → "Guardar".         │
+   │     Queda en el localStorage de tu teléfono y NO se sube a GitHub.    │
+   │                                                                       │
+   │  Opción B: acá abajo, en la constante CLAVE_API_POR_DEFECTO.          │
+   │     ⚠️ Este repositorio es PÚBLICO: si escribís la clave acá,         │
+   │     queda visible para cualquiera y te pueden gastar las 100          │
+   │     consultas mensuales del plan gratuito. Usalo solo si la app       │
+   │     corre en privado.                                                 │
+   └───────────────────────────────────────────────────────────────────────┘
+   ========================================================================= */
+
+// 👇👇👇  PEGÁ ACÁ TU CLAVE SI ELEGÍS LA OPCIÓN B (si no, dejala vacía)  👇👇👇
+const CLAVE_API_POR_DEFECTO = "";
+// 👆👆👆 -------------------------------------------------------------- 👆👆👆
+
+const CLAVE_LS_API = "gastos-viaje-aviationstack-key";
+const CLAVE_LS_PROXY = "gastos-viaje-aviationstack-proxy";
+const CLAVE_LS_CACHE = "gastos-viaje-vuelos-cache-v1";
+const CLAVE_LS_USO = "gastos-viaje-vuelos-uso-v1";
+
+const HOST_AVIATIONSTACK = "api.aviationstack.com/v1/flights";
+const TTL_VUELOS_MS = 15 * 60 * 1000; // 15 min: el plan free son 100 consultas/mes
+const MAX_ENTRADAS_CACHE = 25;
+const LIMITE_MENSUAL_FREE = 100;
+
+/* ---------------- Clave de API ---------------- */
+function obtenerClaveApi() {
+  try {
+    return (localStorage.getItem(CLAVE_LS_API) || CLAVE_API_POR_DEFECTO || "").trim();
+  } catch (_) {
+    return CLAVE_API_POR_DEFECTO;
+  }
+}
+
+function guardarClaveApi(clave) {
+  try {
+    localStorage.setItem(CLAVE_LS_API, (clave || "").trim());
+  } catch (_) { /* almacenamiento no disponible */ }
+}
+
+function borrarClaveApi() {
+  try {
+    localStorage.removeItem(CLAVE_LS_API);
+  } catch (_) { /* nada que hacer */ }
+}
+
+/* Proxy opcional (ver nota sobre HTTPS más abajo) */
+function obtenerProxy() {
+  try {
+    return (localStorage.getItem(CLAVE_LS_PROXY) || "").trim();
+  } catch (_) {
+    return "";
+  }
+}
+
+function guardarProxy(url) {
+  try {
+    localStorage.setItem(CLAVE_LS_PROXY, (url || "").trim());
+  } catch (_) { /* almacenamiento no disponible */ }
+}
+
+/* ---------------- Contador de consultas del mes ---------------- */
+function mesActual() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+}
+
+function usoMensual() {
+  try {
+    const crudo = JSON.parse(localStorage.getItem(CLAVE_LS_USO) || "null");
+    if (crudo && crudo.mes === mesActual()) return crudo;
+  } catch (_) { /* dato corrupto */ }
+  return { mes: mesActual(), consultas: 0, limite: LIMITE_MENSUAL_FREE };
+}
+
+function sumarConsulta() {
+  const uso = usoMensual();
+  uso.consultas += 1;
+  try {
+    localStorage.setItem(CLAVE_LS_USO, JSON.stringify(uso));
+  } catch (_) { /* almacenamiento no disponible */ }
+  return uso;
+}
+
+/* ---------------- Cache en localStorage ---------------- */
+function leerCache() {
+  try {
+    return JSON.parse(localStorage.getItem(CLAVE_LS_CACHE) || "{}") || {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function guardarEnCache(clave, vuelos) {
+  const cache = leerCache();
+  cache[clave] = { vuelos, actualizadoEn: Date.now() };
+  // Se conservan solo las consultas más recientes para no llenar el storage
+  const entradas = Object.entries(cache).sort((a, b) => b[1].actualizadoEn - a[1].actualizadoEn);
+  const recortado = Object.fromEntries(entradas.slice(0, MAX_ENTRADAS_CACHE));
+  try {
+    localStorage.setItem(CLAVE_LS_CACHE, JSON.stringify(recortado));
+  } catch (_) { /* almacenamiento lleno: se sigue igual */ }
+}
+
+function limpiarCacheVuelos() {
+  try {
+    localStorage.removeItem(CLAVE_LS_CACHE);
+  } catch (_) { /* nada que hacer */ }
+}
+
+/* ---------------- Consulta a la API ---------------- */
+function claveDeConsulta(params) {
+  return Object.entries(params)
+    .filter(([, v]) => v)
+    .map(([k, v]) => `${k}=${String(v).toUpperCase()}`)
+    .sort()
+    .join("&");
+}
+
+/**
+ * Arma la URL final.
+ * IMPORTANTE: el plan gratuito de AviationStack solo permite HTTP (sin la "s").
+ * Como esta app se sirve por HTTPS en GitHub Pages, el navegador bloquea ese
+ * pedido por "contenido mixto". Por eso:
+ *   - se intenta HTTPS (funciona en planes pagos),
+ *   - si la página misma se abre por HTTP (localhost / archivo local), se usa HTTP,
+ *   - y se puede configurar un proxy HTTPS desde la pestaña Vuelos (⚙️).
+ */
+function armarUrl(params, { forzarHttp = false } = {}) {
+  const query = new URLSearchParams(params).toString();
+  const proxy = obtenerProxy();
+  const esquema = forzarHttp || location.protocol === "http:" ? "http" : "https";
+  const directa = `${esquema}://${HOST_AVIATIONSTACK}?${query}`;
+  if (!proxy) return directa;
+  // El proxy puede esperar la URL completa (…?url=) o solo el host (…/https://…)
+  return proxy.includes("=") ? proxy + encodeURIComponent(directa) : proxy + directa;
+}
+
+function normalizarError(codigo, mensaje) {
+  const mapa = {
+    invalid_access_key: "La clave de API no es válida. Revisala en ⚙️.",
+    missing_access_key: "Falta la clave de API. Cargala con el botón ⚙️.",
+    inactive_user: "La cuenta de AviationStack está inactiva.",
+    usage_limit_reached: "Se agotaron las consultas del plan (100 por mes en el gratuito).",
+    rate_limit_reached: "Demasiadas consultas seguidas. Esperá un momento.",
+    function_access_restricted: "Esa búsqueda no está incluida en el plan gratuito.",
+    https_access_restricted: "El plan gratuito no permite HTTPS. Configurá un proxy en ⚙️ o abrí la app localmente.",
+    invalid_api_function: "El endpoint consultado no existe.",
+    "404_not_found": "No se encontró el recurso consultado.",
+  };
+  return mapa[codigo] || mensaje || "No se pudo consultar AviationStack";
+}
+
+/**
+ * Busca vuelos en AviationStack.
+ * @param {object} filtros - { flight_iata } o { dep_iata, arr_iata } (+ airline_name…)
+ * @param {object} opciones - { forzar: true } para saltear el cache.
+ * @returns Promise<{ vuelos, actualizadoEn, desdeCache, desactualizado, error, uso }>
+ */
+async function buscarVuelos(filtros, { forzar = false } = {}) {
+  const limpios = Object.fromEntries(
+    Object.entries(filtros).filter(([, v]) => v != null && String(v).trim() !== "")
+  );
+  const clave = claveDeConsulta(limpios);
+  const cache = leerCache();
+  const entrada = cache[clave];
+  const vigente = entrada && Date.now() - entrada.actualizadoEn < TTL_VUELOS_MS;
+
+  if (vigente && !forzar) {
+    return {
+      vuelos: entrada.vuelos,
+      actualizadoEn: entrada.actualizadoEn,
+      desdeCache: true,
+      desactualizado: false,
+      error: null,
+      uso: usoMensual(),
+    };
+  }
+
+  const accessKey = obtenerClaveApi();
+  if (!accessKey) {
+    return {
+      vuelos: entrada?.vuelos || [],
+      actualizadoEn: entrada?.actualizadoEn || null,
+      desdeCache: !!entrada,
+      desactualizado: !!entrada,
+      error: "Falta la clave de API. Cargala con el botón ⚙️.",
+      uso: usoMensual(),
+    };
+  }
+
+  const params = { access_key: accessKey, limit: 20, ...limpios };
+
+  try {
+    const res = await fetch(armarUrl(params));
+    if (!res.ok) throw new Error(`AviationStack respondió ${res.status}`);
+    const json = await res.json();
+
+    if (json.error) throw new Error(normalizarError(json.error.code, json.error.message));
+    if (!Array.isArray(json.data)) throw new Error("Respuesta inesperada de AviationStack");
+
+    const uso = sumarConsulta();
+    guardarEnCache(clave, json.data);
+    return {
+      vuelos: json.data,
+      actualizadoEn: Date.now(),
+      desdeCache: false,
+      desactualizado: false,
+      error: null,
+      uso,
+    };
+  } catch (err) {
+    const mixto = location.protocol === "https:" && !obtenerProxy();
+    const detalle = err instanceof TypeError && mixto
+      ? "No se pudo conectar. El plan gratuito de AviationStack solo funciona por HTTP: configurá un proxy HTTPS en ⚙️ o abrí la app en tu compu (http://localhost)."
+      : err.message;
+    return {
+      vuelos: entrada?.vuelos || [],
+      actualizadoEn: entrada?.actualizadoEn || null,
+      desdeCache: !!entrada,
+      desactualizado: !!entrada,
+      error: detalle,
+      uso: usoMensual(),
+    };
+  }
+}
+
+/* ---------------- Presentación ---------------- */
+const ESTADOS_VUELO = {
+  scheduled: { texto: "Programado", clase: "estado-programado", icono: "🕒" },
+  active: { texto: "En vuelo", clase: "estado-activo", icono: "✈️" },
+  landed: { texto: "Aterrizó", clase: "estado-aterrizado", icono: "🛬" },
+  cancelled: { texto: "Cancelado", clase: "estado-cancelado", icono: "🚫" },
+  incident: { texto: "Incidente", clase: "estado-cancelado", icono: "⚠️" },
+  diverted: { texto: "Desviado", clase: "estado-desviado", icono: "↩️" },
+  unknown: { texto: "Sin datos", clase: "estado-neutro", icono: "❔" },
+};
+
+function estadoVuelo(codigo) {
+  return ESTADOS_VUELO[codigo] || ESTADOS_VUELO.unknown;
+}
+
+
+"use strict";
+
 /* ================= Estado y persistencia ================= */
 const CLAVE = "gastos-viaje-v1";
 
@@ -566,10 +1209,11 @@ function cargar() {
     if (crudo) {
       const datos = JSON.parse(crudo);
       datos.pagosSaldados ??= [];
+      datos.vuelosGuardados ??= [];
       return datos;
     }
   } catch (_) { /* datos corruptos: se reinicia */ }
-  return { personas: [], gastos: [], pagosSaldados: [] };
+  return { personas: [], gastos: [], pagosSaldados: [], vuelosGuardados: [] };
 }
 
 function guardar() {
@@ -1033,17 +1677,393 @@ function renderBalance() {
   }
 }
 
+/* ================= Conversor de moneda ================= */
+const NOMBRES_MONEDA_BASE = { ARS: "Peso argentino", USD: "Dólar estadounidense", EUR: "Euro" };
+
+let conversorEstado = {
+  de: "ARS",
+  a: "USD",
+  tipoDolar: "blue",
+  monedasExtra: [], // [{ codigo, nombre }] agregadas por el usuario en esta sesión
+};
+
+const selConvDe = document.getElementById("conv-de");
+const selConvA = document.getElementById("conv-a");
+const selNuevaMoneda = document.getElementById("conv-nueva-moneda");
+
+// Formato seguro: algunas monedas de DolarAPI (ej. cripto) no son códigos ISO
+// válidos para Intl.NumberFormat, así que si falla se usa un formato genérico.
+function fmtMontoSeguro(valor, moneda) {
+  try {
+    return fmtMonto(valor, moneda);
+  } catch (_) {
+    return new Intl.NumberFormat("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor) + " " + moneda;
+  }
+}
+
+function pintarSelectsConversor() {
+  const opciones = [
+    ...MONEDAS_BASE.map(codigo => ({ codigo, nombre: NOMBRES_MONEDA_BASE[codigo] })),
+    ...conversorEstado.monedasExtra,
+  ];
+  [selConvDe, selConvA].forEach(sel => {
+    sel.innerHTML = "";
+    opciones.forEach(({ codigo, nombre }) => {
+      const opt = document.createElement("option");
+      opt.value = codigo;
+      opt.textContent = `${codigo} — ${nombre}`;
+      sel.appendChild(opt);
+    });
+  });
+  selConvDe.value = conversorEstado.de;
+  selConvA.value = conversorEstado.a;
+}
+
+function actualizarVisibilidadTipoDolar() {
+  const involucraDolar = conversorEstado.de === "USD" || conversorEstado.a === "USD";
+  document.getElementById("campo-tipo-dolar").classList.toggle("hidden", !involucraDolar);
+}
+
+let tokenConversion = 0;
+async function actualizarConversion() {
+  const elResultado = document.getElementById("conv-resultado-valor");
+  const elEstado = document.getElementById("conv-estado");
+  const textoMonto = document.getElementById("conv-monto").value.trim()
+    .replace(/\./g, "").replace(",", ".");
+  const monto = parseFloat(textoMonto);
+
+  if (!monto || monto <= 0) {
+    elResultado.textContent = "—";
+    elEstado.textContent = "";
+    elEstado.className = "nota";
+    return;
+  }
+
+  const miToken = ++tokenConversion;
+  const { valor, desactualizado, error, actualizadoEn } =
+    await convertCurrency(monto, conversorEstado.de, conversorEstado.a, conversorEstado.tipoDolar);
+  if (miToken !== tokenConversion) return; // llegó una respuesta vieja: se descarta
+
+  if (valor == null) {
+    elResultado.textContent = "—";
+    elEstado.textContent = "⚠️ " + (error || "No se pudo obtener la cotización");
+    elEstado.className = "nota nota-error";
+    return;
+  }
+
+  elResultado.textContent = fmtMontoSeguro(valor, conversorEstado.a);
+  const fecha = actualizadoEn ? "Cotización del " + fmtFecha(new Date(actualizadoEn).toISOString()) : "";
+  if (desactualizado) {
+    elEstado.textContent = "⚠️ " + (fecha || "Sin conexión") + " (desactualizada)";
+    elEstado.className = "nota nota-desactualizado";
+  } else {
+    elEstado.textContent = fecha;
+    elEstado.className = "nota";
+  }
+}
+
+selConvDe.addEventListener("change", () => {
+  conversorEstado.de = selConvDe.value;
+  actualizarVisibilidadTipoDolar();
+  actualizarConversion();
+});
+selConvA.addEventListener("change", () => {
+  conversorEstado.a = selConvA.value;
+  actualizarVisibilidadTipoDolar();
+  actualizarConversion();
+});
+
+document.getElementById("conv-invertir").addEventListener("click", () => {
+  [conversorEstado.de, conversorEstado.a] = [conversorEstado.a, conversorEstado.de];
+  pintarSelectsConversor();
+  actualizarVisibilidadTipoDolar();
+  actualizarConversion();
+});
+
+document.getElementById("conv-monto").addEventListener("input", actualizarConversion);
+
+document.getElementById("seg-tipo-dolar").addEventListener("click", e => {
+  const b = e.target.closest(".seg");
+  if (!b) return;
+  conversorEstado.tipoDolar = b.dataset.valor;
+  pintarSegmentos("seg-tipo-dolar", conversorEstado.tipoDolar);
+  actualizarConversion();
+});
+
+document.getElementById("btn-agregar-moneda").addEventListener("click", async () => {
+  const datos = await obtenerCotizaciones();
+  const yaAgregadas = new Set([...MONEDAS_BASE, ...conversorEstado.monedasExtra.map(m => m.codigo)]);
+  const disponibles = monedasDisponibles(datos).filter(m => !yaAgregadas.has(m.codigo));
+  if (disponibles.length === 0) {
+    toast("No hay más monedas disponibles para agregar");
+    return;
+  }
+  selNuevaMoneda.innerHTML = "";
+  disponibles.forEach(({ codigo, nombre }) => {
+    const opt = document.createElement("option");
+    opt.value = codigo;
+    opt.textContent = `${codigo} — ${nombre}`;
+    selNuevaMoneda.appendChild(opt);
+  });
+  selNuevaMoneda.classList.remove("hidden");
+  selNuevaMoneda.focus();
+});
+
+selNuevaMoneda.addEventListener("change", () => {
+  const codigo = selNuevaMoneda.value;
+  if (!codigo) return;
+  const nombre = selNuevaMoneda.selectedOptions[0]?.textContent.split(" — ")[1] || codigo;
+  conversorEstado.monedasExtra.push({ codigo, nombre });
+  conversorEstado.a = codigo;
+  selNuevaMoneda.classList.add("hidden");
+  selNuevaMoneda.innerHTML = "";
+  pintarSelectsConversor();
+  actualizarVisibilidadTipoDolar();
+  actualizarConversion();
+  toast(`${codigo} agregado al conversor`);
+});
+
+document.getElementById("btn-refrescar-cotizacion").addEventListener("click", async () => {
+  await obtenerCotizaciones({ forzar: true });
+  actualizarConversion();
+});
+
+pintarSelectsConversor();
+actualizarVisibilidadTipoDolar();
+actualizarConversion();
+
+/* ================= Vuelos (AviationStack) ================= */
+let vuelosEstado = {
+  modo: "numero",       // "numero" | "ruta"
+  resultados: [],
+  buscado: false,
+};
+
+const inputVueloNumero = document.getElementById("vuelo-numero");
+const inputVueloOrigen = document.getElementById("vuelo-origen");
+const inputVueloDestino = document.getElementById("vuelo-destino");
+const elVuelosEstado = document.getElementById("vuelos-estado");
+const contConfigVuelos = document.getElementById("config-vuelos");
+
+// Hora local del aeropuerto (AviationStack devuelve ISO + su zona horaria IANA)
+function fmtHoraAeropuerto(iso, zona) {
+  if (!iso) return "--:--";
+  try {
+    return new Date(iso).toLocaleTimeString("es-AR", {
+      hour: "2-digit", minute: "2-digit", hour12: false, timeZone: zona || undefined,
+    });
+  } catch (_) {
+    return new Date(iso).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hour12: false });
+  }
+}
+
+function fmtFechaVuelo(fecha) {
+  if (!fecha) return "";
+  const d = new Date(fecha + "T00:00:00");
+  return d.toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "short" });
+}
+
+function idDeVuelo(v) {
+  const numero = v.flight?.iata || v.flight?.number || "?";
+  return `${numero}-${v.flight_date || ""}`;
+}
+
+document.getElementById("seg-modo-vuelo").addEventListener("click", e => {
+  const b = e.target.closest(".seg");
+  if (!b) return;
+  vuelosEstado.modo = b.dataset.valor;
+  pintarSegmentos("seg-modo-vuelo", vuelosEstado.modo);
+  document.getElementById("campo-vuelo-numero").classList.toggle("hidden", vuelosEstado.modo !== "numero");
+  document.getElementById("campo-vuelo-ruta").classList.toggle("hidden", vuelosEstado.modo !== "ruta");
+});
+
+document.getElementById("vuelo-invertir").addEventListener("click", () => {
+  const o = inputVueloOrigen.value;
+  inputVueloOrigen.value = inputVueloDestino.value;
+  inputVueloDestino.value = o;
+});
+
+[inputVueloNumero, inputVueloOrigen, inputVueloDestino].forEach(input => {
+  input.addEventListener("input", () => { input.value = input.value.toUpperCase(); });
+});
+
+document.getElementById("form-vuelo").addEventListener("submit", e => {
+  e.preventDefault();
+  ejecutarBusquedaVuelos();
+});
+
+async function ejecutarBusquedaVuelos({ forzar = false } = {}) {
+  let filtros;
+  if (vuelosEstado.modo === "numero") {
+    const numero = inputVueloNumero.value.trim().replace(/\s+/g, "");
+    if (!numero) { toast("Ingresá el número de vuelo (ej: AR1301)"); return; }
+    filtros = { flight_iata: numero };
+  } else {
+    const origen = inputVueloOrigen.value.trim();
+    const destino = inputVueloDestino.value.trim();
+    if (!origen && !destino) { toast("Ingresá al menos un aeropuerto"); return; }
+    filtros = { dep_iata: origen, arr_iata: destino };
+  }
+
+  elVuelosEstado.textContent = "Buscando vuelos…";
+  elVuelosEstado.className = "nota";
+
+  const { vuelos, actualizadoEn, desdeCache, error, uso } = await buscarVuelos(filtros, { forzar });
+  vuelosEstado.resultados = vuelos;
+  vuelosEstado.buscado = true;
+  renderVuelos();
+  renderUsoApi(uso);
+
+  if (error) {
+    elVuelosEstado.textContent = "⚠️ " + error;
+    elVuelosEstado.className = "nota nota-error";
+    if (!obtenerClaveApi()) contConfigVuelos.classList.remove("hidden");
+    return;
+  }
+  if (vuelos.length === 0) {
+    elVuelosEstado.textContent = "No se encontraron vuelos con esos datos.";
+    elVuelosEstado.className = "nota";
+    return;
+  }
+  const cuando = actualizadoEn ? fmtFecha(new Date(actualizadoEn).toISOString()) : "";
+  elVuelosEstado.textContent = `${vuelos.length} vuelo(s) · ${desdeCache ? "guardado del " : "consultado el "}${cuando}`;
+  elVuelosEstado.className = "nota";
+}
+
+function tarjetaVuelo(v, { guardado = false } = {}) {
+  const est = estadoVuelo(v.flight_status);
+  const salida = v.departure || {};
+  const llegada = v.arrival || {};
+  const numero = v.flight?.iata || v.flight?.number || "—";
+  const aerolinea = v.airline?.name || "";
+  const demora = salida.delay || llegada.delay;
+
+  const card = document.createElement("div");
+  card.className = "vuelo-card";
+  card.innerHTML = `
+    <div class="vuelo-cabecera">
+      <div>
+        <div class="vuelo-numero">${escaparHtml(numero)}</div>
+        <div class="vuelo-aerolinea">${escaparHtml(aerolinea)}${v.flight_date ? " · " + escaparHtml(fmtFechaVuelo(v.flight_date)) : ""}</div>
+      </div>
+      <span class="vuelo-estado ${est.clase}">${est.icono} ${est.texto}</span>
+    </div>
+    <div class="vuelo-ruta">
+      <div class="vuelo-punta">
+        <div class="vuelo-iata">${escaparHtml(salida.iata || "???")}</div>
+        <div class="vuelo-hora">${fmtHoraAeropuerto(salida.estimated || salida.scheduled, salida.timezone)}</div>
+        <div class="vuelo-detalle">${escaparHtml(salida.airport || "")}</div>
+        <div class="vuelo-detalle">${salida.terminal ? "Terminal " + escaparHtml(salida.terminal) : ""}${salida.gate ? " · Puerta " + escaparHtml(salida.gate) : ""}</div>
+      </div>
+      <div class="vuelo-flecha">✈</div>
+      <div class="vuelo-punta vuelo-punta-fin">
+        <div class="vuelo-iata">${escaparHtml(llegada.iata || "???")}</div>
+        <div class="vuelo-hora">${fmtHoraAeropuerto(llegada.estimated || llegada.scheduled, llegada.timezone)}</div>
+        <div class="vuelo-detalle">${escaparHtml(llegada.airport || "")}</div>
+        <div class="vuelo-detalle">${llegada.terminal ? "Terminal " + escaparHtml(llegada.terminal) : ""}${llegada.baggage ? " · Cinta " + escaparHtml(llegada.baggage) : ""}</div>
+      </div>
+    </div>
+    ${demora ? `<div class="vuelo-demora">⏱️ Demora de ${demora} min</div>` : ""}`;
+
+  const btn = document.createElement("button");
+  btn.className = guardado ? "btn-secundario btn-vuelo-accion" : "btn-secundario btn-vuelo-accion";
+  btn.textContent = guardado ? "🗑 Quitar de mi itinerario" : "📌 Guardar en mi itinerario";
+  btn.addEventListener("click", () => guardado ? quitarVueloGuardado(idDeVuelo(v)) : guardarVuelo(v));
+  card.appendChild(btn);
+  return card;
+}
+
+function renderVuelos() {
+  const cont = document.getElementById("lista-vuelos");
+  cont.innerHTML = "";
+  const guardados = new Set(estado.vuelosGuardados.map(idDeVuelo));
+  vuelosEstado.resultados.forEach(v => cont.appendChild(tarjetaVuelo(v, { guardado: guardados.has(idDeVuelo(v)) })));
+  document.getElementById("vuelos-vacio").classList.toggle(
+    "hidden",
+    vuelosEstado.buscado || estado.vuelosGuardados.length > 0
+  );
+  renderVuelosGuardados();
+}
+
+function renderVuelosGuardados() {
+  const cont = document.getElementById("vuelos-guardados");
+  cont.innerHTML = "";
+  if (estado.vuelosGuardados.length === 0) return;
+  const titulo = document.createElement("div");
+  titulo.className = "titulo-moneda";
+  titulo.style.marginTop = "6px";
+  titulo.textContent = "📌 Mi itinerario";
+  cont.appendChild(titulo);
+  const lista = document.createElement("div");
+  lista.className = "lista";
+  estado.vuelosGuardados.forEach(v => lista.appendChild(tarjetaVuelo(v, { guardado: true })));
+  cont.appendChild(lista);
+}
+
+function guardarVuelo(v) {
+  if (estado.vuelosGuardados.some(g => idDeVuelo(g) === idDeVuelo(v))) return;
+  estado.vuelosGuardados.push(v);
+  guardar();
+  renderVuelos();
+  toast("Vuelo guardado en tu itinerario ✔");
+}
+
+function quitarVueloGuardado(id) {
+  estado.vuelosGuardados = estado.vuelosGuardados.filter(v => idDeVuelo(v) !== id);
+  guardar();
+  renderVuelos();
+  toast("Vuelo quitado del itinerario");
+}
+
+/* ---------- Configuración de la clave de API ---------- */
+function renderUsoApi(uso) {
+  const el = document.getElementById("uso-api");
+  const u = uso || usoMensual();
+  el.textContent = `Consultas hechas este mes: ${u.consultas} de ${u.limite} (plan gratuito).`;
+  el.className = u.consultas >= u.limite ? "nota nota-error" : "nota";
+}
+
+document.getElementById("btn-config-vuelos").addEventListener("click", () => {
+  const oculto = contConfigVuelos.classList.toggle("hidden");
+  if (!oculto) {
+    document.getElementById("input-api-key").value = obtenerClaveApi();
+    document.getElementById("input-api-proxy").value = obtenerProxy();
+    renderUsoApi();
+  }
+});
+
+document.getElementById("btn-guardar-key").addEventListener("click", () => {
+  guardarClaveApi(document.getElementById("input-api-key").value);
+  guardarProxy(document.getElementById("input-api-proxy").value);
+  contConfigVuelos.classList.add("hidden");
+  toast(obtenerClaveApi() ? "Clave guardada ✔" : "Clave vacía: no se podrán buscar vuelos");
+});
+
+document.getElementById("btn-borrar-key").addEventListener("click", () => {
+  borrarClaveApi();
+  guardarProxy("");
+  document.getElementById("input-api-key").value = "";
+  document.getElementById("input-api-proxy").value = "";
+  toast("Clave borrada de este dispositivo");
+});
+
+renderVuelos();
+
 /* ================= Reiniciar viaje ================= */
 document.getElementById("btn-reiniciar").addEventListener("click", () => {
-  if (!confirm("¿Borrar TODOS los viajeros y gastos? Esta acción no se puede deshacer.")) return;
-  estado = { personas: [], gastos: [], pagosSaldados: [] };
+  if (!confirm("¿Borrar TODOS los viajeros, gastos y vuelos guardados? Esta acción no se puede deshacer.")) return;
+  estado = { personas: [], gastos: [], pagosSaldados: [], vuelosGuardados: [] };
   guardar();
   render();
+  renderVuelos();
   toast("Viaje reiniciado");
 });
 
+/* ================= Service worker (PWA) ================= */
+/* (versión portable: sin service worker) */
 
 render();
-</script>
+
+  </script>
 </body>
 </html>

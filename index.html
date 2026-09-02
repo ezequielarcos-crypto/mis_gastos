@@ -99,6 +99,86 @@
         <p id="conv-estado" class="nota"></p>
       </div>
     </section>
+
+    <!-- TAB: VUELOS -->
+    <section id="tab-vuelos" class="tab">
+      <div class="card">
+        <div class="fila-titulo-conversor">
+          <h2>🛫 Estado de vuelos</h2>
+          <button type="button" id="btn-config-vuelos" class="btn-refrescar" aria-label="Configurar clave de API">⚙️</button>
+        </div>
+
+        <div class="campo">
+          <span>Buscar por</span>
+          <div class="segmentos" id="seg-modo-vuelo">
+            <button type="button" data-valor="numero" class="seg activo">N.º de vuelo</button>
+            <button type="button" data-valor="ruta" class="seg">Ruta</button>
+          </div>
+        </div>
+
+        <form id="form-vuelo" autocomplete="off">
+          <div id="campo-vuelo-numero">
+            <label class="campo">
+              <span>Número de vuelo (IATA)</span>
+              <input type="text" id="vuelo-numero" placeholder="Ej: AR1301" maxlength="10">
+            </label>
+          </div>
+
+          <div id="campo-vuelo-ruta" class="hidden">
+            <div class="fila-conversor">
+              <label class="campo campo-moneda">
+                <span>Origen</span>
+                <input type="text" id="vuelo-origen" placeholder="EZE" maxlength="3">
+              </label>
+              <button type="button" id="vuelo-invertir" class="btn-invertir" aria-label="Invertir origen y destino">⇄</button>
+              <label class="campo campo-moneda">
+                <span>Destino</span>
+                <input type="text" id="vuelo-destino" placeholder="MAD" maxlength="3">
+              </label>
+            </div>
+            <p class="nota">Códigos IATA de 3 letras (EZE, AEP, MAD, GRU…).</p>
+          </div>
+
+          <button type="submit" class="btn-primario btn-ancho">🔍 Buscar vuelos</button>
+        </form>
+        <p id="vuelos-estado" class="nota"></p>
+      </div>
+
+      <!-- Configuración de la API -->
+      <div id="config-vuelos" class="card hidden">
+        <h2>🔑 Clave de AviationStack</h2>
+        <p class="nota">
+          Sacá tu clave gratuita en <strong>aviationstack.com</strong> (100 consultas por mes).
+          Se guarda solo en este dispositivo.
+        </p>
+        <label class="campo">
+          <span>Access key</span>
+          <input type="text" id="input-api-key" placeholder="Pegá acá tu clave" autocomplete="off">
+        </label>
+        <label class="campo">
+          <span>Proxy HTTPS (opcional)</span>
+          <input type="text" id="input-api-proxy" placeholder="https://mi-proxy.com/?url=" autocomplete="off">
+        </label>
+        <p class="nota">
+          El plan gratuito solo responde por HTTP, y esta app se sirve por HTTPS: si ves un error de
+          conexión, cargá acá un proxy HTTPS o abrí la app localmente.
+        </p>
+        <div class="fila-botones">
+          <button type="button" id="btn-borrar-key" class="btn-secundario">Borrar</button>
+          <button type="button" id="btn-guardar-key" class="btn-primario">Guardar</button>
+        </div>
+        <p id="uso-api" class="nota"></p>
+      </div>
+
+      <div id="lista-vuelos" class="lista"></div>
+
+      <div id="vuelos-guardados"></div>
+
+      <div id="vuelos-vacio" class="vacio">
+        <div class="vacio-icono">🛫</div>
+        <p>Buscá un vuelo por número o por ruta<br>para ver horarios, puertas y demoras.</p>
+      </div>
+    </section>
   </main>
 
   <!-- Botón flotante -->
@@ -110,6 +190,7 @@
     <button class="tabbar-btn" data-tab="balance"><span class="tab-icono">⚖️</span>Balance</button>
     <button class="tabbar-btn" data-tab="personas"><span class="tab-icono">👥</span>Personas</button>
     <button class="tabbar-btn" data-tab="cambio"><span class="tab-icono">💱</span>Cambio</button>
+    <button class="tabbar-btn" data-tab="vuelos"><span class="tab-icono">🛫</span>Vuelos</button>
   </nav>
 
   <!-- Hoja modal: nuevo gasto -->
@@ -175,6 +256,7 @@
   <div id="toast" class="toast hidden"></div>
 
   <script src="cotizaciones.js"></script>
+  <script src="vuelos.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
