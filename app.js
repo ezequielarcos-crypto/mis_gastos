@@ -11,10 +11,11 @@ function cargar() {
     if (crudo) {
       const datos = JSON.parse(crudo);
       datos.pagosSaldados ??= [];
+      datos.vuelosGuardados ??= [];
       return datos;
     }
   } catch (_) { /* datos corruptos: se reinicia */ }
-  return { personas: [], gastos: [], pagosSaldados: [] };
+  return { personas: [], gastos: [], pagosSaldados: [], vuelosGuardados: [] };
 }
 
 function guardar() {
@@ -633,12 +634,230 @@ pintarSelectsConversor();
 actualizarVisibilidadTipoDolar();
 actualizarConversion();
 
+/* ================= Vuelos (AviationStack) ================= */
+let vuelosEstado = {
+  modo: "numero",       // "numero" | "ruta"
+  resultados: [],
+  buscado: false,
+};
+
+const inputVueloNumero = document.getElementById("vuelo-numero");
+const inputVueloOrigen = document.getElementById("vuelo-origen");
+const inputVueloDestino = document.getElementById("vuelo-destino");
+const elVuelosEstado = document.getElementById("vuelos-estado");
+const contConfigVuelos = document.getElementById("config-vuelos");
+
+// Hora local del aeropuerto (AviationStack devuelve ISO + su zona horaria IANA)
+function fmtHoraAeropuerto(iso, zona) {
+  if (!iso) return "--:--";
+  try {
+    return new Date(iso).toLocaleTimeString("es-AR", {
+      hour: "2-digit", minute: "2-digit", hour12: false, timeZone: zona || undefined,
+    });
+  } catch (_) {
+    return new Date(iso).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hour12: false });
+  }
+}
+
+function fmtFechaVuelo(fecha) {
+  if (!fecha) return "";
+  const d = new Date(fecha + "T00:00:00");
+  return d.toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "short" });
+}
+
+function idDeVuelo(v) {
+  const numero = v.flight?.iata || v.flight?.number || "?";
+  return `${numero}-${v.flight_date || ""}`;
+}
+
+document.getElementById("seg-modo-vuelo").addEventListener("click", e => {
+  const b = e.target.closest(".seg");
+  if (!b) return;
+  vuelosEstado.modo = b.dataset.valor;
+  pintarSegmentos("seg-modo-vuelo", vuelosEstado.modo);
+  document.getElementById("campo-vuelo-numero").classList.toggle("hidden", vuelosEstado.modo !== "numero");
+  document.getElementById("campo-vuelo-ruta").classList.toggle("hidden", vuelosEstado.modo !== "ruta");
+});
+
+document.getElementById("vuelo-invertir").addEventListener("click", () => {
+  const o = inputVueloOrigen.value;
+  inputVueloOrigen.value = inputVueloDestino.value;
+  inputVueloDestino.value = o;
+});
+
+[inputVueloNumero, inputVueloOrigen, inputVueloDestino].forEach(input => {
+  input.addEventListener("input", () => { input.value = input.value.toUpperCase(); });
+});
+
+document.getElementById("form-vuelo").addEventListener("submit", e => {
+  e.preventDefault();
+  ejecutarBusquedaVuelos();
+});
+
+async function ejecutarBusquedaVuelos({ forzar = false } = {}) {
+  let filtros;
+  if (vuelosEstado.modo === "numero") {
+    const numero = inputVueloNumero.value.trim().replace(/\s+/g, "");
+    if (!numero) { toast("Ingresá el número de vuelo (ej: AR1301)"); return; }
+    filtros = { flight_iata: numero };
+  } else {
+    const origen = inputVueloOrigen.value.trim();
+    const destino = inputVueloDestino.value.trim();
+    if (!origen && !destino) { toast("Ingresá al menos un aeropuerto"); return; }
+    filtros = { dep_iata: origen, arr_iata: destino };
+  }
+
+  elVuelosEstado.textContent = "Buscando vuelos…";
+  elVuelosEstado.className = "nota";
+
+  const { vuelos, actualizadoEn, desdeCache, error, uso } = await buscarVuelos(filtros, { forzar });
+  vuelosEstado.resultados = vuelos;
+  vuelosEstado.buscado = true;
+  renderVuelos();
+  renderUsoApi(uso);
+
+  if (error) {
+    elVuelosEstado.textContent = "⚠️ " + error;
+    elVuelosEstado.className = "nota nota-error";
+    if (!obtenerClaveApi()) contConfigVuelos.classList.remove("hidden");
+    return;
+  }
+  if (vuelos.length === 0) {
+    elVuelosEstado.textContent = "No se encontraron vuelos con esos datos.";
+    elVuelosEstado.className = "nota";
+    return;
+  }
+  const cuando = actualizadoEn ? fmtFecha(new Date(actualizadoEn).toISOString()) : "";
+  elVuelosEstado.textContent = `${vuelos.length} vuelo(s) · ${desdeCache ? "guardado del " : "consultado el "}${cuando}`;
+  elVuelosEstado.className = "nota";
+}
+
+function tarjetaVuelo(v, { guardado = false } = {}) {
+  const est = estadoVuelo(v.flight_status);
+  const salida = v.departure || {};
+  const llegada = v.arrival || {};
+  const numero = v.flight?.iata || v.flight?.number || "—";
+  const aerolinea = v.airline?.name || "";
+  const demora = salida.delay || llegada.delay;
+
+  const card = document.createElement("div");
+  card.className = "vuelo-card";
+  card.innerHTML = `
+    <div class="vuelo-cabecera">
+      <div>
+        <div class="vuelo-numero">${escaparHtml(numero)}</div>
+        <div class="vuelo-aerolinea">${escaparHtml(aerolinea)}${v.flight_date ? " · " + escaparHtml(fmtFechaVuelo(v.flight_date)) : ""}</div>
+      </div>
+      <span class="vuelo-estado ${est.clase}">${est.icono} ${est.texto}</span>
+    </div>
+    <div class="vuelo-ruta">
+      <div class="vuelo-punta">
+        <div class="vuelo-iata">${escaparHtml(salida.iata || "???")}</div>
+        <div class="vuelo-hora">${fmtHoraAeropuerto(salida.estimated || salida.scheduled, salida.timezone)}</div>
+        <div class="vuelo-detalle">${escaparHtml(salida.airport || "")}</div>
+        <div class="vuelo-detalle">${salida.terminal ? "Terminal " + escaparHtml(salida.terminal) : ""}${salida.gate ? " · Puerta " + escaparHtml(salida.gate) : ""}</div>
+      </div>
+      <div class="vuelo-flecha">✈</div>
+      <div class="vuelo-punta vuelo-punta-fin">
+        <div class="vuelo-iata">${escaparHtml(llegada.iata || "???")}</div>
+        <div class="vuelo-hora">${fmtHoraAeropuerto(llegada.estimated || llegada.scheduled, llegada.timezone)}</div>
+        <div class="vuelo-detalle">${escaparHtml(llegada.airport || "")}</div>
+        <div class="vuelo-detalle">${llegada.terminal ? "Terminal " + escaparHtml(llegada.terminal) : ""}${llegada.baggage ? " · Cinta " + escaparHtml(llegada.baggage) : ""}</div>
+      </div>
+    </div>
+    ${demora ? `<div class="vuelo-demora">⏱️ Demora de ${demora} min</div>` : ""}`;
+
+  const btn = document.createElement("button");
+  btn.className = guardado ? "btn-secundario btn-vuelo-accion" : "btn-secundario btn-vuelo-accion";
+  btn.textContent = guardado ? "🗑 Quitar de mi itinerario" : "📌 Guardar en mi itinerario";
+  btn.addEventListener("click", () => guardado ? quitarVueloGuardado(idDeVuelo(v)) : guardarVuelo(v));
+  card.appendChild(btn);
+  return card;
+}
+
+function renderVuelos() {
+  const cont = document.getElementById("lista-vuelos");
+  cont.innerHTML = "";
+  const guardados = new Set(estado.vuelosGuardados.map(idDeVuelo));
+  vuelosEstado.resultados.forEach(v => cont.appendChild(tarjetaVuelo(v, { guardado: guardados.has(idDeVuelo(v)) })));
+  document.getElementById("vuelos-vacio").classList.toggle(
+    "hidden",
+    vuelosEstado.buscado || estado.vuelosGuardados.length > 0
+  );
+  renderVuelosGuardados();
+}
+
+function renderVuelosGuardados() {
+  const cont = document.getElementById("vuelos-guardados");
+  cont.innerHTML = "";
+  if (estado.vuelosGuardados.length === 0) return;
+  const titulo = document.createElement("div");
+  titulo.className = "titulo-moneda";
+  titulo.style.marginTop = "6px";
+  titulo.textContent = "📌 Mi itinerario";
+  cont.appendChild(titulo);
+  const lista = document.createElement("div");
+  lista.className = "lista";
+  estado.vuelosGuardados.forEach(v => lista.appendChild(tarjetaVuelo(v, { guardado: true })));
+  cont.appendChild(lista);
+}
+
+function guardarVuelo(v) {
+  if (estado.vuelosGuardados.some(g => idDeVuelo(g) === idDeVuelo(v))) return;
+  estado.vuelosGuardados.push(v);
+  guardar();
+  renderVuelos();
+  toast("Vuelo guardado en tu itinerario ✔");
+}
+
+function quitarVueloGuardado(id) {
+  estado.vuelosGuardados = estado.vuelosGuardados.filter(v => idDeVuelo(v) !== id);
+  guardar();
+  renderVuelos();
+  toast("Vuelo quitado del itinerario");
+}
+
+/* ---------- Configuración de la clave de API ---------- */
+function renderUsoApi(uso) {
+  const el = document.getElementById("uso-api");
+  const u = uso || usoMensual();
+  el.textContent = `Consultas hechas este mes: ${u.consultas} de ${u.limite} (plan gratuito).`;
+  el.className = u.consultas >= u.limite ? "nota nota-error" : "nota";
+}
+
+document.getElementById("btn-config-vuelos").addEventListener("click", () => {
+  const oculto = contConfigVuelos.classList.toggle("hidden");
+  if (!oculto) {
+    document.getElementById("input-api-key").value = obtenerClaveApi();
+    document.getElementById("input-api-proxy").value = obtenerProxy();
+    renderUsoApi();
+  }
+});
+
+document.getElementById("btn-guardar-key").addEventListener("click", () => {
+  guardarClaveApi(document.getElementById("input-api-key").value);
+  guardarProxy(document.getElementById("input-api-proxy").value);
+  contConfigVuelos.classList.add("hidden");
+  toast(obtenerClaveApi() ? "Clave guardada ✔" : "Clave vacía: no se podrán buscar vuelos");
+});
+
+document.getElementById("btn-borrar-key").addEventListener("click", () => {
+  borrarClaveApi();
+  guardarProxy("");
+  document.getElementById("input-api-key").value = "";
+  document.getElementById("input-api-proxy").value = "";
+  toast("Clave borrada de este dispositivo");
+});
+
+renderVuelos();
+
 /* ================= Reiniciar viaje ================= */
 document.getElementById("btn-reiniciar").addEventListener("click", () => {
-  if (!confirm("¿Borrar TODOS los viajeros y gastos? Esta acción no se puede deshacer.")) return;
-  estado = { personas: [], gastos: [], pagosSaldados: [] };
+  if (!confirm("¿Borrar TODOS los viajeros, gastos y vuelos guardados? Esta acción no se puede deshacer.")) return;
+  estado = { personas: [], gastos: [], pagosSaldados: [], vuelosGuardados: [] };
   guardar();
   render();
+  renderVuelos();
   toast("Viaje reiniciado");
 });
 

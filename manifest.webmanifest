@@ -1,7 +1,7 @@
 {
   "name": "Gastos de Viaje",
   "short_name": "Gastos",
-  "description": "Control de gastos compartidos para vacaciones",
+  "description": "Control de gastos compartidos, cambio de moneda y estado de vuelos para vacaciones",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
