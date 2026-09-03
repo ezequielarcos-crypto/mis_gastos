@@ -68,6 +68,36 @@ function toast(msj) {
   toastTimer = setTimeout(() => el.classList.add("hidden"), 2600);
 }
 
+/* ================= Diálogo de confirmación ================= */
+// Reemplaza a confirm() del navegador, que muestra el dominio ("… dice") y no
+// se puede estilar. Devuelve una promesa que resuelve true/false.
+const overlayConfirmar = document.getElementById("overlay-confirmar");
+let resolverConfirmacion = null;
+
+function confirmar({ titulo, texto, icono = "🗑️", aceptar = "Borrar" }) {
+  document.getElementById("confirmar-icono").textContent = icono;
+  document.getElementById("confirmar-titulo").textContent = titulo;
+  document.getElementById("confirmar-texto").textContent = texto;
+  document.getElementById("confirmar-si").textContent = aceptar;
+  overlayConfirmar.classList.remove("hidden");
+  document.getElementById("confirmar-no").focus();
+  return new Promise(resolve => { resolverConfirmacion = resolve; });
+}
+
+function cerrarConfirmacion(respuesta) {
+  overlayConfirmar.classList.add("hidden");
+  const resolver = resolverConfirmacion;
+  resolverConfirmacion = null;
+  if (resolver) resolver(respuesta);
+}
+
+document.getElementById("confirmar-si").addEventListener("click", () => cerrarConfirmacion(true));
+document.getElementById("confirmar-no").addEventListener("click", () => cerrarConfirmacion(false));
+overlayConfirmar.addEventListener("click", e => { if (e.target === overlayConfirmar) cerrarConfirmacion(false); });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !overlayConfirmar.classList.contains("hidden")) cerrarConfirmacion(false);
+});
+
 /* ================= Navegación por pestañas ================= */
 document.querySelectorAll(".tabbar-btn").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -217,11 +247,18 @@ document.getElementById("form-gasto").addEventListener("submit", e => {
   toast("Gasto guardado ✔");
 });
 
-function borrarGasto(id) {
-  if (!confirm("¿Borrar este gasto?")) return;
+async function borrarGasto(id) {
+  const gasto = estado.gastos.find(g => g.id === id);
+  if (!gasto) return;
+  const ok = await confirmar({
+    titulo: "¿Borrar este gasto?",
+    texto: `“${gasto.motivo}” · ${fmtMonto(gasto.monto, gasto.moneda)}\nSe va a recalcular el balance del grupo.`,
+  });
+  if (!ok) return;
   estado.gastos = estado.gastos.filter(g => g.id !== id);
   guardar();
   render();
+  toast("Gasto borrado");
 }
 
 /* ================= Balance ================= */
@@ -852,8 +889,14 @@ document.getElementById("btn-borrar-key").addEventListener("click", () => {
 renderVuelos();
 
 /* ================= Reiniciar viaje ================= */
-document.getElementById("btn-reiniciar").addEventListener("click", () => {
-  if (!confirm("¿Borrar TODOS los viajeros, gastos y vuelos guardados? Esta acción no se puede deshacer.")) return;
+document.getElementById("btn-reiniciar").addEventListener("click", async () => {
+  const ok = await confirmar({
+    titulo: "¿Empezar un viaje nuevo?",
+    texto: "Se van a borrar todos los viajeros, gastos, pagos y vuelos guardados de este dispositivo.\nEsta acción no se puede deshacer.",
+    icono: "⚠️",
+    aceptar: "Borrar todo",
+  });
+  if (!ok) return;
   estado = { personas: [], gastos: [], pagosSaldados: [], vuelosGuardados: [] };
   guardar();
   render();

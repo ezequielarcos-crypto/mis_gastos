@@ -253,6 +253,19 @@
     </div>
   </div>
 
+  <!-- Diálogo de confirmación propio (reemplaza al confirm() del navegador) -->
+  <div id="overlay-confirmar" class="overlay overlay-centrado hidden">
+    <div class="dialogo" role="alertdialog" aria-modal="true" aria-labelledby="confirmar-titulo">
+      <div class="dialogo-icono" id="confirmar-icono">🗑️</div>
+      <h2 id="confirmar-titulo">¿Estás seguro?</h2>
+      <p id="confirmar-texto"></p>
+      <div class="fila-botones">
+        <button type="button" id="confirmar-no" class="btn-secundario">Cancelar</button>
+        <button type="button" id="confirmar-si" class="btn-peligro btn-confirmar">Borrar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast hidden"></div>
 
   <script src="cotizaciones.js"></script>
