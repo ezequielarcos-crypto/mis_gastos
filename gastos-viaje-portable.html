@@ -447,6 +447,37 @@ input[type="text"]:focus, select:focus { border-color: var(--primario-claro); }
 .nota-error { color: var(--rojo); }
 .nota-desactualizado { color: #b45309; }
 
+/* ---------- Diálogo de confirmación ---------- */
+.overlay-centrado { align-items: center; padding: 24px; z-index: 25; }
+
+.dialogo {
+  background: var(--tarjeta);
+  width: 100%;
+  max-width: 360px;
+  border-radius: 22px;
+  padding: 26px 22px 20px;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, .25);
+  animation: acercar .18s ease;
+}
+@keyframes acercar {
+  from { opacity: 0; transform: scale(.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+.dialogo-icono { font-size: 2.6rem; line-height: 1; margin-bottom: 12px; }
+.dialogo h2 { font-size: 1.15rem; margin-bottom: 8px; }
+.dialogo p {
+  font-size: .9rem;
+  color: var(--texto-suave);
+  line-height: 1.5;
+  margin-bottom: 22px;
+  white-space: pre-line; /* respeta los saltos de línea del texto */
+}
+.dialogo .fila-botones { margin-top: 0; }
+.dialogo .btn-secundario, .dialogo .btn-confirmar { flex: 1; }
+.btn-confirmar { background: var(--rojo); color: #fff; }
+.btn-confirmar:active { background: #b91c1c; }
+
 /* ---------- Vuelos ---------- */
 .btn-ancho { width: 100%; }
 
@@ -798,6 +829,19 @@ input[type="text"]:focus, select:focus { border-color: var(--primario-claro); }
           <button type="submit" class="btn-primario">Guardar gasto</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Diálogo de confirmación propio (reemplaza al confirm() del navegador) -->
+  <div id="overlay-confirmar" class="overlay overlay-centrado hidden">
+    <div class="dialogo" role="alertdialog" aria-modal="true" aria-labelledby="confirmar-titulo">
+      <div class="dialogo-icono" id="confirmar-icono">🗑️</div>
+      <h2 id="confirmar-titulo">¿Estás seguro?</h2>
+      <p id="confirmar-texto"></p>
+      <div class="fila-botones">
+        <button type="button" id="confirmar-no" class="btn-secundario">Cancelar</button>
+        <button type="button" id="confirmar-si" class="btn-peligro btn-confirmar">Borrar</button>
+      </div>
     </div>
   </div>
 
@@ -1266,6 +1310,36 @@ function toast(msj) {
   toastTimer = setTimeout(() => el.classList.add("hidden"), 2600);
 }
 
+/* ================= Diálogo de confirmación ================= */
+// Reemplaza a confirm() del navegador, que muestra el dominio ("… dice") y no
+// se puede estilar. Devuelve una promesa que resuelve true/false.
+const overlayConfirmar = document.getElementById("overlay-confirmar");
+let resolverConfirmacion = null;
+
+function confirmar({ titulo, texto, icono = "🗑️", aceptar = "Borrar" }) {
+  document.getElementById("confirmar-icono").textContent = icono;
+  document.getElementById("confirmar-titulo").textContent = titulo;
+  document.getElementById("confirmar-texto").textContent = texto;
+  document.getElementById("confirmar-si").textContent = aceptar;
+  overlayConfirmar.classList.remove("hidden");
+  document.getElementById("confirmar-no").focus();
+  return new Promise(resolve => { resolverConfirmacion = resolve; });
+}
+
+function cerrarConfirmacion(respuesta) {
+  overlayConfirmar.classList.add("hidden");
+  const resolver = resolverConfirmacion;
+  resolverConfirmacion = null;
+  if (resolver) resolver(respuesta);
+}
+
+document.getElementById("confirmar-si").addEventListener("click", () => cerrarConfirmacion(true));
+document.getElementById("confirmar-no").addEventListener("click", () => cerrarConfirmacion(false));
+overlayConfirmar.addEventListener("click", e => { if (e.target === overlayConfirmar) cerrarConfirmacion(false); });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !overlayConfirmar.classList.contains("hidden")) cerrarConfirmacion(false);
+});
+
 /* ================= Navegación por pestañas ================= */
 document.querySelectorAll(".tabbar-btn").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -1415,11 +1489,18 @@ document.getElementById("form-gasto").addEventListener("submit", e => {
   toast("Gasto guardado ✔");
 });
 
-function borrarGasto(id) {
-  if (!confirm("¿Borrar este gasto?")) return;
+async function borrarGasto(id) {
+  const gasto = estado.gastos.find(g => g.id === id);
+  if (!gasto) return;
+  const ok = await confirmar({
+    titulo: "¿Borrar este gasto?",
+    texto: `“${gasto.motivo}” · ${fmtMonto(gasto.monto, gasto.moneda)}\nSe va a recalcular el balance del grupo.`,
+  });
+  if (!ok) return;
   estado.gastos = estado.gastos.filter(g => g.id !== id);
   guardar();
   render();
+  toast("Gasto borrado");
 }
 
 /* ================= Balance ================= */
@@ -2050,8 +2131,14 @@ document.getElementById("btn-borrar-key").addEventListener("click", () => {
 renderVuelos();
 
 /* ================= Reiniciar viaje ================= */
-document.getElementById("btn-reiniciar").addEventListener("click", () => {
-  if (!confirm("¿Borrar TODOS los viajeros, gastos y vuelos guardados? Esta acción no se puede deshacer.")) return;
+document.getElementById("btn-reiniciar").addEventListener("click", async () => {
+  const ok = await confirmar({
+    titulo: "¿Empezar un viaje nuevo?",
+    texto: "Se van a borrar todos los viajeros, gastos, pagos y vuelos guardados de este dispositivo.\nEsta acción no se puede deshacer.",
+    icono: "⚠️",
+    aceptar: "Borrar todo",
+  });
+  if (!ok) return;
   estado = { personas: [], gastos: [], pagosSaldados: [], vuelosGuardados: [] };
   guardar();
   render();

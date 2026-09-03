@@ -1,4 +1,4 @@
-const CACHE = "gastos-viaje-v4";
+const CACHE = "gastos-viaje-v4-1";
 const ARCHIVOS = [
   "./",
   "./index.html",
